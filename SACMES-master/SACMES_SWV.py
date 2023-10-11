@@ -17,18 +17,14 @@ os.system("clear && printf '\e[3J'")
 import sys
 import time
 import datetime
-try:
-    import Tkinter as tk
-    from Tkinter.ttk import *
-    from Tkinter import *
-    from Tknter import filedialog, Menu
 
-except ImportError: # Python 3
-    import tkinter as tk
-    from tkinter.ttk import *
-    from tkinter import *
-    from tkinter import filedialog, Menu
-    from tkinter.messagebox import showinfo
+
+import tkinter as tk
+from tkinter import *
+from tkinter import *
+from tkinter import filedialog, Menu
+from tkinter import ttk
+from tkinter.messagebox import showinfo
 
 
 from matplotlib import style
@@ -119,7 +115,7 @@ spacing_index = 3
 
 #-- set the initial limit in bytes to filter out preinitialized files < 3000b
 byte_limit = 3000
-#- set the initial bite index to match the checkbutton
+#- set the initial bite index to match the checkButton
 #- index in the toolbar menu MainWindow.byte_menu
 byte_index = 2
 
@@ -437,15 +433,15 @@ class MainWindow(tk.Tk):
         l.grid(row=box_value, column=0)
 
         box_value += 1
-        self.space_delimiter = tk.Radiobutton(box, text='Space',variable = self.delimiter_value, value = 1)
+        self.space_delimiter = tk.RadioButton(box, text='Space',variable = self.delimiter_value, value = 1)
         self.space_delimiter.grid(row=box_value,column=0,pady=5)
 
         box_value += 1
-        self.tab_delimiter = tk.Radiobutton(box, text = 'Tab',variable = self.delimiter_value, value = 2)
+        self.tab_delimiter = tk.RadioButton(box, text = 'Tab',variable = self.delimiter_value, value = 2)
         self.tab_delimiter.grid(row=box_value, column=0,pady=3)
 
         box_value += 1
-        self.tab_delimiter = tk.Radiobutton(box, text = 'Comma',variable = self.delimiter_value, value = 3)
+        self.tab_delimiter = tk.RadioButton(box, text = 'Comma',variable = self.delimiter_value, value = 3)
         self.tab_delimiter.grid(row=box_value, column=0,pady=3)
 
         box_value = 0
@@ -453,15 +449,15 @@ class MainWindow(tk.Tk):
         l.grid(row=box_value, column=1)
 
         box_value += 1
-        self.txt_value = tk.Radiobutton(box, text='txt',variable = self.extension_value, value = 1)
+        self.txt_value = tk.RadioButton(box, text='txt',variable = self.extension_value, value = 1)
         self.txt_value.grid(row=box_value,column=1,pady=5)
 
         box_value += 1
-        self.csv_value = tk.Radiobutton(box, text = 'csv',variable = self.extension_value, value = 2)
+        self.csv_value = tk.RadioButton(box, text = 'csv',variable = self.extension_value, value = 2)
         self.csv_value.grid(row=box_value, column=1,pady=3)
 
         box_value += 1
-        self.dta_value = tk.Radiobutton(box, text = 'dta',variable = self.extension_value, value = 3)
+        self.dta_value = tk.RadioButton(box, text = 'dta',variable = self.extension_value, value = 3)
         self.dta_value.grid(row=box_value, column=1,pady=3)
 
 
@@ -528,7 +524,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         self.SelectFilePath.grid(row=row_value,column=0,columnspan=4)
         row_value += 2
 
-        self.NoSelectedPath = tk.Label(self, text = 'No File Path Selected', font = MEDIUM_FONT, fg = 'red')
+        self.NoSelectedPath = tk.Label(self, text = 'No File Path Selected', fg = 'red')
         self.PathWarningExists = False               # tracks the existence of a warning label
 
         ImportFileLabel = tk.Label(self, text = 'Import File Label', font=LARGE_FONT).grid(row=row_value,column=0,columnspan=2)
@@ -539,7 +535,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         #--- File Handle Input ---#
         HandleLabel = tk.Label(self, text='Exported File Handle:', font=LARGE_FONT)
         HandleLabel.grid(row=row_value,column=2,columnspan=2)
-        self.filehandle = ttk.Entry(self)
+        self.filehandle = tk.Entry(self)
         now = datetime.datetime.now()
         hour = str(now.hour)
         day = str(now.day)
@@ -556,14 +552,14 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         #---File Limit Input---#
         numFileLabel = tk.Label(self, text='Number of Files:', font=LARGE_FONT)
         numFileLabel.grid(row=row_value,column=0,columnspan=2,pady=4)
-        self.numfiles = ttk.Entry(self, width=7)
+        self.numfiles = tk.Entry(self, width=7)
         self.numfiles.insert(END, '50')
         self.numfiles.grid(row=row_value+1,column=0,columnspan=2,pady=6)
 
         #--- Analysis interval for event callback in ElectrochemicalAnimation ---#
         IntervalLabel = tk.Label(self, text='Analysis Interval (ms):', font=LARGE_FONT)
         IntervalLabel.grid(row=row_value,column=2,columnspan=2,pady=4)
-        self.Interval = ttk.Entry(self, width=7)
+        self.Interval = tk.Entry(self, width=7)
         self.Interval.insert(END, '10')
         self.Interval.grid(row=row_value+1,column=2,columnspan=2,pady=6)
 
@@ -572,7 +568,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         #---Sample Rate Variable---#
         SampleLabel = tk.Label(self, text='Sampling Rate (s):', font=LARGE_FONT)
         SampleLabel.grid(row=row_value,column=0,columnspan=2)
-        self.sample_rate = ttk.Entry(self, width=7)
+        self.sample_rate = tk.Entry(self, width=7)
         self.sample_rate.insert(END, '20')
         self.sample_rate.grid(row=row_value+1,column=0,columnspan=2)
 
@@ -668,7 +664,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             self.scrollbar.grid(row=1,sticky='nse')
             self.FrequencyList.config(yscrollcommand=self.scrollbar.set)
 
-        ManipulateFrequencies = tk.Button(self.ListboxFrame, text = 'Edit', font = MEDIUM_FONT, command = lambda: ManipulateFrequenciesFrame.tkraise()).grid(row=2,column=0,columnspan=4)
+        ManipulateFrequencies = ttk.Button(self.ListboxFrame, text = 'Edit', command = lambda: ManipulateFrequenciesFrame.tkraise()).grid(row=2,column=0,columnspan=4)
 
         ###########################################################
         ### Frame for adding/deleting frequencies from the list ###
@@ -677,17 +673,17 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         ManipulateFrequenciesFrame = tk.Frame(self, width=10, bd = 3, relief = 'groove')
         ManipulateFrequenciesFrame.grid(row=row_value,column=2,columnspan=2,padx=10,pady=10, sticky='nsew')
 
-        ManipulateFrequencyLabel = tk.Label(ManipulateFrequenciesFrame, text = 'Enter Frequency(s)', font = MEDIUM_FONT)
+        ManipulateFrequencyLabel = tk.Label(ManipulateFrequenciesFrame, text = 'Enter Frequency(s)')
         ManipulateFrequencyLabel.grid(row=0,column=0,columnspan=4)
 
         self.FrequencyEntry = tk.Entry(ManipulateFrequenciesFrame, width=8)
         self.FrequencyEntry.grid(row=1,column=0,columnspan=4)
 
-        AddFrequencyButton = tk.Button(ManipulateFrequenciesFrame, text='Add', font = MEDIUM_FONT, command = lambda: self.AddFrequency()).grid(row=2,column=0)
-        DeleteFrequencyButton = tk.Button(ManipulateFrequenciesFrame, text='Delete', font = MEDIUM_FONT, command = lambda: self.DeleteFrequency()).grid(row=2,column=1)
-        ClearFrequencyButton = tk.Button(ManipulateFrequenciesFrame, text='Clear', font = MEDIUM_FONT, command = lambda: self.Clear()).grid(row=3,column=0,columnspan=2)
+        AddFrequencyButton = ttk.Button(ManipulateFrequenciesFrame, text='Add', command = lambda: self.AddFrequency()).grid(row=2,column=0)
+        DeleteFrequencyButton = ttk.Button(ManipulateFrequenciesFrame, text='Delete', command = lambda: self.DeleteFrequency()).grid(row=2,column=1)
+        ClearFrequencyButton = ttk.Button(ManipulateFrequenciesFrame, text='Clear', command = lambda: self.Clear()).grid(row=3,column=0,columnspan=2)
 
-        ReturnButton = tk.Button(ManipulateFrequenciesFrame, text = 'Return', font = MEDIUM_FONT, command = lambda: self.Return()).grid(row=4,column=0,columnspan=2)
+        ReturnButton = ttk.Button(ManipulateFrequenciesFrame, text = 'Return', command = lambda: self.Return()).grid(row=4,column=0,columnspan=2)
 
         ManipulateFrequenciesFrame.rowconfigure(0, weight=1)
         ManipulateFrequenciesFrame.rowconfigure(1, weight=1)
@@ -724,7 +720,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             self.PlotOptions.insert(END, option)
 
         #--- Warning label for if the user does not select an analysis method ---#
-        self.NoOptionsSelected = tk.Label(self, text = 'Select a Data Analysis Method', font = MEDIUM_FONT, fg='red')   # will only be added to the grid (row 16) if they dont select an option
+        self.NoOptionsSelected = tk.Label(self, text = 'Select a Data Analysis Method', fg='red')   # will only be added to the grid (row 16) if they dont select an option
         self.NoSelection = False
 
 
@@ -821,12 +817,16 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         #--- Ask the User if they want to export the data to a .txt file ---#
         self.SaveVar = BooleanVar()
         self.SaveVar.set(False)
-        self.SaveBox = Checkbutton(self, variable=self.SaveVar, onvalue=True, offvalue=False, text="Export Data").grid(row=row_value,column=0,columnspan=2)
+        #self.SaveBox = CheckButton(self, variable=self.SaveVar, onvalue=True, offvalue=False, text="Export Data").grid(row=row_value,column=0,columnspan=2)
+        self.SaveBox = Checkbutton(self, variable=self.SaveVar, onvalue=True, offvalue=False, text="Export Data")
+        self.SaveBox.grid(row=row_value, column=0, columnspan=2)
 
         #--- Ask the User if they want to export the data to a .txt file ---#
         self.InjectionVar = BooleanVar()
         self.InjectionVar.set(False)
-        self.InjectionCheck = Checkbutton(self, variable=self.InjectionVar, onvalue=True, offvalue=False, text="Injection Experiment?").grid(row=row_value,column=2,columnspan=2)
+        self.InjectionCheck = Checkbutton(self, variable=self.InjectionVar, onvalue=True, offvalue=False, text="Injection Experiment?")
+        self.InjectionCheck.grid(row=row_value, column=2, columnspan=2)
+
         row_value += 1
 
 
@@ -936,7 +936,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             ### exported .txt file will be placed  ###
             ExportPath = FilePath.split('/')
 
-            #-- change the text of the find file button to the folder the user chose --#
+            #-- change the text of the find file Button to the folder the user chose --#
             DataFolder = '%s/%s' % (ExportPath[-3],ExportPath[-2])
 
             self.SelectFilePath['style'] = 'On.TButton'
@@ -1243,7 +1243,7 @@ class CheckPoint():
                 else:
                     column_value = 1
 
-        self.stop = tk.Button(self.win, text = 'Stop', command = self.stop)
+        self.stop = ttk.Button(self.win, text = 'Stop', command = self.stop)
         self.stop.grid(row=row_value, column=0,columnspan=2,pady=5)
         self.StopSearch = False
 
@@ -1554,13 +1554,13 @@ class ContinuousScanManipulationFrame(tk.Frame):
         #--- Display the file number ---#
         FileTitle = tk.Label(self, text = 'File Number', font=MEDIUM_FONT,)
         FileTitle.grid(row=0,column=0,padx=5,pady=5)
-        FileLabel = ttk.Label(self, text = '1', font=LARGE_FONT, style='Fun.TButton')
+        FileLabel = tk.Label(self, text = '1', font=LARGE_FONT, style='Fun.TButton')
         FileLabel.grid(row=1,column=0,padx=5,pady=5)
 
         #--- Display the experiment duration as a function of the user-inputted Sample Rate ---#
         SampleTitle = tk.Label(self, text = 'Experiment Time (h)', font=MEDIUM_FONT)
         SampleTitle.grid(row=0,column=1,padx=5,pady=5)
-        RealTimeSampleLabel = ttk.Label(self, text = '0', style='Fun.TButton')
+        RealTimeSampleLabel = tk.Label(self, text = '0', style='Fun.TButton')
         RealTimeSampleLabel.grid(row=1,column=1,padx=5,pady=5)
 
         #--- Real-time Normalization Variable ---#
@@ -1568,7 +1568,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
         NormalizationVar = tk.StringVar()
         NormString = str(3)
         NormalizationVar.set(NormString)
-        self.SetPointNorm = ttk.Entry(self, textvariable = NormalizationVar, width=8)
+        self.SetPointNorm = tk.Entry(self, textvariable = NormalizationVar, width=8)
         SetPointNorm = self.SetPointNorm
 
         #--- Button to apply any changes to the normalization variable ---#
@@ -1593,7 +1593,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
         #--- Real-time Injection tracking ---#
         SetInjectionLabel = tk.Label(self, text = 'Set Injection Range', font=MEDIUM_FONT)
         InjectionButton = ttk.Button(self, text='Apply Injection', command = lambda: self.RealTimeInjection(), width=10)
-        self.SetInjectionPoint = ttk.Entry(self, width=8)
+        self.SetInjectionPoint = tk.Entry(self, width=8)
 
 
         ## If this is an injection experiment, grid the widgets ##
@@ -1743,7 +1743,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
 
         ############################################################
         ### If both high and low frequencies are being analyzed, ###
-        ### create buttons to switch between the two             ###
+        ### create Buttons to switch between the two             ###
         ############################################################
         if self.High is True:
             if self.Low is True:
@@ -1755,7 +1755,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
 
 
         #--- Button to apply adjustments ---#
-        self.AdjustParameterButton = tk.Button(RegressionFrame, text = 'Apply Adjustments', font=LARGE_FONT, command = lambda: self.AdjustParameters())
+        self.AdjustParameterButton = ttk.Button(RegressionFrame, text = 'Apply Adjustments', font=LARGE_FONT, command = lambda: self.AdjustParameters())
         self.AdjustParameterButton.grid(row=5,column=0,columnspan=4,pady=10,padx=10)
 
 
@@ -2152,7 +2152,7 @@ class FrequencyMapManipulationFrame(tk.Frame):
 
         ############################################################
         ### If both high and low frequencies are being analyzed, ###
-        ### create buttons to switch between the two             ###
+        ### create Buttons to switch between the two             ###
         ############################################################
         if self.High is True:
             if self.Low is True:
@@ -2164,7 +2164,7 @@ class FrequencyMapManipulationFrame(tk.Frame):
 
 
         #--- Button to apply adjustments ---#
-        self.AdjustParameterButton = tk.Button(RegressionFrame, text = 'Apply Adjustments', font=LARGE_FONT, command = lambda: self.AdjustParameters())
+        self.AdjustParameterButton = ttk.Button(RegressionFrame, text = 'Apply Adjustments', font=LARGE_FONT, command = lambda: self.AdjustParameters())
         self.AdjustParameterButton.grid(row=5,column=0,columnspan=4,pady=10,padx=10)
 
 
@@ -4513,7 +4513,7 @@ class PostAnalysis(tk.Frame):
         NormalizationVar = tk.StringVar()
         NormString = str(NormalizationPoint)
         NormalizationVar.set(NormString)
-        self.SetPointNorm = ttk.Entry(NormalizationFrame, textvariable = NormalizationVar, width=8)
+        self.SetPointNorm = tk.Entry(NormalizationFrame, textvariable = NormalizationVar, width=8)
         self.SetPointNorm.grid(row=1,column=0,pady=5)
         SetPointNorm = self.SetPointNorm
 
@@ -4572,7 +4572,7 @@ class PostAnalysis(tk.Frame):
         self.DataExportFrame = tk.Frame(self,relief='groove',bd=2)
         self.DataExportFrame.grid(row=row_value,column=0,pady=5,ipady=5)
 
-        self.DataExportSettings = tk.Button(self.DataExportFrame, text = 'Data Export Settings', command = lambda: self.DataExportTopLevel)
+        self.DataExportSettings = ttk.Button(self.DataExportFrame, text = 'Data Export Settings', command = lambda: self.DataExportTopLevel)
 
         #---Buttons to switch between electrode frames---#
         frame_value = 0
@@ -4597,7 +4597,7 @@ class PostAnalysis(tk.Frame):
         ExportSettings = tk.Frame(self)
         ExportSettings.grid(row=row_value,column=0,columnspan=2,pady=5,ipady=10)
 
-        ExportSettingsButton = tk.Button(ExportSettings, text = 'Post Analysis Data Export', command = self.DataExportTopLevel)
+        ExportSettingsButton = ttk.Button(ExportSettings, text = 'Post Analysis Data Export', command = self.DataExportTopLevel)
         ExportSettingsButton.grid(row=0, column=0,padx=5)
 
         ExportSettings.columnconfigure(1,weight=1)
@@ -4870,13 +4870,13 @@ class PostAnalysis(tk.Frame):
         self.SelectFilePath = ttk.Button(self.win, style = 'On.TButton', text = '%s' % DataFolder, command = lambda: self.FindFile(self.parent))
         self.SelectFilePath.grid(row=0,column=0,columnspan=2)
 
-        self.NoSelectedPath = tk.Label(self.win, text = 'No File Path Selected', font = MEDIUM_FONT, fg = 'red')
+        self.NoSelectedPath = tk.Label(self.win, text = 'No File Path Selected', fg = 'red')
         self.PathWarningExists = False               # tracks the existence of a warning label
 
         #--- File Handle Input ---#
         HandleLabel = tk.Label(self.win, text='Exported File Handle:', font=LARGE_FONT)
         HandleLabel.grid(row=4,column=0,columnspan=2)
-        self.filehandle = ttk.Entry(self.win)
+        self.filehandle = tk.Entry(self.win)
         self.filehandle.insert(END, FileHandle)
         self.filehandle.grid(row=5,column=0,columnspan=2,pady=5)
 
@@ -4898,10 +4898,10 @@ class PostAnalysis(tk.Frame):
         for frequency in frequency_list:
             self.FrequencyList.insert(END, frequency)
 
-        ExportData = tk.Button(self.win, text = 'Export Data', command = lambda: self.PostAnalysisDataExport())
+        ExportData = ttk.Button(self.win, text = 'Export Data', command = lambda: self.PostAnalysisDataExport())
         ExportData.grid(row=15,column=0,columnspan=2)
 
-        CloseButton = tk.Button(self.win, text = 'Close', command = lambda: self.win.destroy())
+        CloseButton = ttk.Button(self.win, text = 'Close', command = lambda: self.win.destroy())
         CloseButton.grid(row=16,column=0,columnspan=2,pady=10)
 
 
@@ -4957,7 +4957,7 @@ class PostAnalysis(tk.Frame):
             ### exported .txt file will be placed  ###
             ExportPath = FilePath.split('/')
 
-            #-- change the text of the find file button to the folder the user chose --#
+            #-- change the text of the find file Button to the folder the user chose --#
             DataFolder = '%s/%s' % (ExportPath[-3],ExportPath[-2])
 
             self.SelectFilePath['style'] = 'On.TButton'
@@ -5629,7 +5629,7 @@ if __name__ == '__main__':
 
     style = ttk.Style()
     style.configure('On.TButton', foreground = 'blue', font = LARGE_FONT, relief = 'raised', border = 100)
-    style.configure('Off.TButton', foreground = 'black', font = MEDIUM_FONT, relief = 'sunken', border = 5)
+    style.configure('Off.TButton', foreground = 'black', relief = 'sunken', border = 5)
 
 
     while True:
