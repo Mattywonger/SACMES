@@ -1,23 +1,11 @@
-
-#---------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------#
-
-                                    ########################
-                                    ### Import Libraries ###
-                                    ########################
-
-
-#---Clear mac terminal memory---#
+import Config,helper
 import os
 import matplotlib
-matplotlib.use('TkAgg')
-os.system("clear && printf '\e[3J'")
-
-#---Import Modules---#
 import sys
 import time
 import datetime
-
+matplotlib.use('TkAgg') # To use the TkAGG backend for matplotlib
+os.system("clear && printf '\e[3J'")
 
 import tkinter as tk
 from tkinter import *
@@ -56,133 +44,23 @@ warnings.simplefilter('ignore', np.RankWarning)         #numpy polyfit_deg warni
 warnings.filterwarnings(action="ignore", module="scipy", message="^internal gelsd") #RuntimeWarning
 
 
-#---------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------#
+handle_variable,e_var,PHE_method,InputFrequencies,electrodes = Config.globalvar_config()
+sg_window,sg_degree,polyfit_deg,cutoff_frequency = Config.regressionvar_config()
+key,search_lim,PoisonPill,FoundFilePath,ExistVar,AlreadyInitiated,HighAlreadyReset,LowAlreadyReset,analysis_complete= Config.checkpoint_parameter()
+delimiter,extension,current_column,current_column_index,voltage_column,voltage_column_index,spacing_index,byte_limit,byte_index = Config.data_extraction_parameter()
+LowFrequencyOffset,LowFrequencySlope = Config.low_freq_parameter()
+HUGE_FONT,LARGE_FONT,MEDIUM_FONT,SMALL_FONT = Config.font_specification()
+#Global variables
 
-#-- file handle variable --#
-handle_variable = ''    # default handle variable is nothing
-e_var = 'single'        # default input file is 'Multichannel', or a single file containing all electrodes
-PHE_method = 'Abs'      # default PHE Extraction is difference between absolute max/min
-
-#------------------------------------------------------------#
-
-InputFrequencies = [30,80,240]  # frequencies initially displayed in Frequency Listbox
-electrodes = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-
-#---------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------#
-
-                                    ########################
-                                    ### Global Variables ###
-                                    ########################
-
-########################################
-### Polynomial Regression Parameters ###
-########################################
-sg_window = 5           ### Savitzky-Golay window (in mV range), must be odd number (increase signal:noise)
-sg_degree = 1           ### Savitzky-Golay polynomial degree
-polyfit_deg = 15        ### degree of polynomial fit
-
-cutoff_frequency = 50          ### frequency that separates 'low' and 'high'
-                               ### frequencies for regression analysis and
-                               ### smoothing manipulation
-
-#############################
-### Checkpoint Parameters ###
-#############################
-key = 0                 ### SkeletonKey
-search_lim = 15         ### Search limit (sec)
-PoisonPill = False      ### Stop Animation variable
-FoundFilePath = False   ### If the user-inputted file is found
-ExistVar = False        ### If Checkpoints are not met ExistVar = True
-AlreadyInitiated = False    ### indicates if the user has already initiated analysis
-HighAlreadyReset = False    ### If data for high frequencies has been reset
-LowAlreadyReset = False      ### If data for low frequencies has been reset
-analysis_complete = False    ### If analysis has completed, begin PostAnalysis
-
-##################################
-### Data Extraction Parameters ###
-##################################
-delimiter = 1               ### default delimiter is a space; 2 = tab
-extension = 1
-current_column = 4           ### column index for list_val.
-current_column_index = 3
-                              # list_val = column_index + 3
-                              # defauly column is the second (so index = 1)
-voltage_column = 1
-voltage_column_index = 0
-spacing_index = 3
-
-#-- set the initial limit in bytes to filter out preinitialized files < 3000b
-byte_limit = 3000
-#- set the initial bite index to match the checkButton
-#- index in the toolbar menu MainWindow.byte_menu
-byte_index = 2
-
-######################################################
-### Low frequency baseline manipulation Parameters ###
-######################################################
-LowFrequencyOffset = 0         ### Vertical offset of normalized data for
-                               ### user specified 'Low Frequency'
-LowFrequencySlope = 0          ### Slope manipulation of norm data for user
-                               ### specified 'Low Frequency'
+method=""
 
 
-###############
-### Styling ###
-###############
-HUGE_FONT = ('Verdana', 18)
-LARGE_FONT = ('Verdana', 11)
-MEDIUM_FONT = ('Verdnana', 10)
-SMALL_FONT = ('Verdana', 8)
-
-
-                        ########################
-                        ### Global Functions ###
-                        ########################
-
-
-##############################
-### Retrieve the file name ###
-##############################
-def _retrieve_file(file, electrode, frequency):
+def _retrieve_file(file, electrode, frequency,method):
     try:
         if method == 'Continuous Scan':
-
-            if e_var == 'single':
-                filename = '%s%dHz_%d%s' % (handle_variable, frequency, file,extension)
-                filename2 = '%s%dHz__%d%s' % (handle_variable, frequency, file,extension)
-                filename3 = '%s%dHz_#%d%s' % (handle_variable, frequency, file,extension)
-                filename4 = '%s%dHz__#%d%s' % (handle_variable, frequency, file,extension)
-
-            elif e_var == 'multiple':
-                filename = 'E%s_%s%sHz_%d%s' % (electrode,handle_variable,frequency,file,extension)
-                filename2 = 'E%s_%s%sHz__%d%s' % (electrode,handle_variable,frequency,file,extension)
-                filename3 = 'E%s_%s%sHz_#%d%s' % (electrode,handle_variable,frequency,file,extension)
-                filename4 = 'E%s_%s%sHz__#%d%s' % (electrode,handle_variable,frequency,file,extension)
-
-            return filename, filename2, filename3, filename4
-
+            helper.process_continuous_scan(e_var,handle_variable,frequency,file,extension,electrode)
         elif method == 'Frequency Map':
-
-            if e_var == 'single':
-                filename = '%s%dHz%s' % (handle_variable, frequency, extension)
-                filename2 = '%s%dHz_%s' % (handle_variable, frequency, extension)
-                filename3 = '%s%dHz_%d%s' % (handle_variable, frequency, file, extension)
-                filename4 = '%s%dHz__%d%s' % (handle_variable, frequency, file, extension)
-                filename5 = '%s%dHz_#%d%s' % (handle_variable, frequency, file, extension)
-                filename6 = '%s%dHz__#%d%s' % (handle_variable, frequency, file, extension)
-
-
-            elif e_var == 'multiple':
-                filename = 'E%s_%s%sHz%s' % (electrode,handle_variable,frequency, extension)
-                filename2 = 'E%s_%s%sHz_%s' % (electrode,handle_variable,frequency, extension)
-                filename3 = 'E%s_%s%sHz_%d%s' % (electrode,handle_variable,frequency,file, extension)
-                filename4 = 'E%s_%s%sHz__%d%s' % (electrode,handle_variable,frequency,file, extension)
-                filename5 = 'E%s_%s%sHz_#%d%s' % (electrode,handle_variable,frequency,file, extension)
-                filename6 = 'E%s_%s%sHz__#%d%s' % (electrode,handle_variable,frequency,file, extension)
-
-            return filename, filename2, filename3, filename4, filename5, filename6
+            helper.process_Frequencymap(e_var,handle_variable, frequency, file, extension,electrode)
     except:
         print('\nError in retrieve_file\n')
 
@@ -205,7 +83,7 @@ def ReadData(myfile, electrode):
         try:
             #---Preallocate Potential and Current lists---#
             with open(myfile,'r',encoding='utf-16') as mydata:
-                encoding = 'utf-16'
+               
 
                 variables = len(mydata.readlines())
                 potentials = ['hold']*variables
@@ -338,7 +216,7 @@ class MainWindow(tk.Tk):
 
         #--- Raise the frame for initial UI ---#
         ShowFrames = {}                                 # Key: frame handle / Value: tk.Frame object
-        frame = InputFrame(container, self.master)
+        frame = InputFrame(container, self.master,method)
         ShowFrames[InputFrame] = frame
         frame.grid(row=0, column=0, sticky = 'nsew')
         self.show_frame(InputFrame)
@@ -506,11 +384,12 @@ class MainWindow(tk.Tk):
         quit()
 
 class InputFrame(tk.Frame):                         # first frame that is displayed when the program is initialized
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller,method):
         global figures, StartNormalizationVar, SaveBox, ManipulateFrequenciesFrame
 
         self.parent = parent
         self.controller = controller
+        self.method=method
 
         tk.Frame.__init__(self, parent)             # initialize the frame
 
@@ -699,7 +578,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         Methods = ['Continuous Scan','Frequency Map']
         MethodsLabel = tk.Label(self, text='Select Analysis Method', font=LARGE_FONT)
         self.MethodsBox = Listbox(self, relief='groove', exportselection=0, font=LARGE_FONT, height=len(Methods), selectmode='single', bd=3)
-        self.MethodsBox.bind('<<ListboxSelect>>', self.SelectMethod)
+        self.MethodsBox.bind('<<ListboxSelect>>', self.SelectMethod())
         MethodsLabel.grid(row=row_value,column=0,columnspan=4)
         row_value += 1
         self.MethodsBox.grid(row=row_value,column=0,columnspan=4)
@@ -958,22 +837,22 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             print('\n\nInputPage.FindFile: Could Not Find File Path\n\n')
 
     #--- Analysis Method ---#
-    def SelectMethod(self, evt):
+    def SelectMethod(self):
         global method
         method = str((self.MethodsBox.get(self.MethodsBox.curselection())))
 
     #--- Analysis Method ---#
-    def SelectPlotOptions(self, evt):
+    def SelectPlotOptions(self):
         global SelectedOptions
         SelectedOptions = str((self.PlotOptions.get(self.PlotOptions.curselection())))
 
 
-    def SelectXaxisOptions(self, evt):
+    def SelectXaxisOptions(self):
         global XaxisOptions
         XaxisOptions = str((self.XaxisOptions.get(self.XaxisOptions.curselection())))
 
     #--- Electrode Selection ---#
-    def ElectrodeCurSelect(self, evt):
+    def ElectrodeCurSelect(self):
         ###################################################
         ## electrode_list: list; ints                    ##
         ## electrode_dict: dict; {electrode: index}      ##
@@ -1000,7 +879,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             self.ElectrodeLabel['fg'] = 'black'
 
     #--- Frequency Selection ---#
-    def FrequencyCurSelect(self, evt):
+    def FrequencyCurSelect(self):
         global frequency_list, frequency_dict, LowFrequency, HighFrequency, HighLowList
 
         frequency_list = [self.FrequencyList.get(idx) for idx in self.FrequencyList.curselection()]
@@ -3509,7 +3388,7 @@ class ElectrochemicalAnimation():
                                                        self._end_redraw)
 
 
-    def _end_redraw(self, evt):
+    def _end_redraw(self):
         # Now that the redraw has happened, do the post draw flushing and
         # blit handling. Then re-enable all of the original events.
         self._post_draw(True)
@@ -4905,7 +4784,7 @@ class PostAnalysis(tk.Frame):
         CloseButton.grid(row=16,column=0,columnspan=2,pady=10)
 
 
-    def ElectrodeCurSelect(self, evt):
+    def ElectrodeCurSelect(self):
 
         ###################################################
         ## electrode_list: list; ints                    ##
@@ -4925,7 +4804,7 @@ class PostAnalysis(tk.Frame):
             self.ElectrodeLabel['fg'] = 'black'
 
     #--- Frequency Selection ---#
-    def FrequencyCurSelect(self, evt):
+    def FrequencyCurSelect(self):
         global frequency_list, frequency_dict, LowFrequency, HighFrequency
 
         self.frequency_list = [self.FrequencyList.get(idx) for idx in self.FrequencyList.curselection()]
@@ -5623,7 +5502,7 @@ def _update_global_lists(file):
                     ############################################
 
 if __name__ == '__main__':
-
+    method=""
     root = tk.Tk()
     app = MainWindow(root)
 
