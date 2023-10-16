@@ -838,8 +838,13 @@ class InputFrame(tk.Frame):                         # first frame that is displa
 
     #--- Analysis Method ---#
     def SelectMethod(self):
-        global method
-        method = str((self.MethodsBox.get(self.MethodsBox.curselection())))
+            global method
+            selection = self.MethodsBox.curselection()
+            if selection:
+                method = str(self.MethodsBox.get(selection))
+            else:
+        # Handle the case when no item is selected
+                method = "No selection"
 
     #--- Analysis Method ---#
     def SelectPlotOptions(self):
@@ -3569,7 +3574,7 @@ class ElectrochemicalAnimation():
             if not PoisonPill:
                 root.after(100,self._step)
 
-    def _check_queue():
+    def _check_queue(self):
 
         while True:
             try:
@@ -4784,14 +4789,15 @@ class PostAnalysis(tk.Frame):
         CloseButton.grid(row=16,column=0,columnspan=2,pady=10)
 
 
-    def ElectrodeCurSelect(self):
+    def ElectrodeCurSelect(self,event):
 
         ###################################################
         ## electrode_list: list; ints                    ##
         ## electrode_dict: dict; {electrode: index}      ##
         ## electrode_count: int                          ##
         ###################################################
-
+        print(event)
+        
         self.electrode_list = [self.ElectrodeCount.get(idx) for idx in self.ElectrodeCount.curselection()]
         self.electrode_list = [int(electrode) for electrode in self.electrode_list]
 
