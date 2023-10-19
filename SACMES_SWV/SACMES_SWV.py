@@ -875,11 +875,11 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             electrode_dict[electrode] = index
             index += 1
 
-        if electrode_count is 0:
+        if electrode_count == 0:
             self.ElectrodeListExists = False
             self.ElectrodeLabel['fg'] = 'red'
 
-        elif electrode_count is not 0:
+        elif electrode_count != 0:
             self.ElectrodeListExists = True
             self.ElectrodeLabel['fg'] = 'black'
 
@@ -890,7 +890,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         frequency_list = [self.FrequencyList.get(idx) for idx in self.FrequencyList.curselection()]
 
 
-        if len(frequency_list) is not 0:
+        if len(frequency_list) != 0:
 
             self.FrequencyListExists = True
             self.FrequencyLabel['fg'] = 'black'
@@ -912,7 +912,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
                 frequency_dict[frequency] = count
                 count += 1
 
-        elif len(frequency_list) is 0:
+        elif len(frequency_list) == 0:
             self.FrequencyListExists = False
             self.FrequencyLabel['fg'] = 'red'
 
@@ -1126,7 +1126,7 @@ class CheckPoint():
                     row_value += 1
                 else:
                     column_value = 1
-
+        
         self.stop = ttk.Button(self.win, text = 'Stop', command = self.stop)
         self.stop.grid(row=row_value, column=0,columnspan=2,pady=5)
         self.StopSearch = False
@@ -5516,14 +5516,11 @@ if __name__ == '__main__':
     style.configure('On.TButton', foreground = 'blue', font = LARGE_FONT, relief = 'raised', border = 100)
     style.configure('Off.TButton', foreground = 'black', relief = 'sunken', border = 5)
 
-
     while True:
         #--- initiate the mainloop ---#
         try:
             root.mainloop()
-            for element in frequency_list:
-                print("THIS IS A TEST")
-                print(element)
+            
         #--- escape scrolling error ---#
         except UnicodeDecodeError:
             pass
