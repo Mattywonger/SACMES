@@ -847,17 +847,17 @@ class InputFrame(tk.Frame):                         # first frame that is displa
                 method = "No selection"
 
     #--- Analysis Method ---#
-    def SelectPlotOptions(self):
+    def SelectPlotOptions(self,event):
         global SelectedOptions
         SelectedOptions = str((self.PlotOptions.get(self.PlotOptions.curselection())))
 
 
-    def SelectXaxisOptions(self):
+    def SelectXaxisOptions(self,event):
         global XaxisOptions
         XaxisOptions = str((self.XaxisOptions.get(self.XaxisOptions.curselection())))
 
     #--- Electrode Selection ---#
-    def ElectrodeCurSelect(self):
+    def ElectrodeCurSelect(self,event):
         ###################################################
         ## electrode_list: list; ints                    ##
         ## electrode_dict: dict; {electrode: index}      ##
@@ -884,7 +884,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             self.ElectrodeLabel['fg'] = 'black'
 
     #--- Frequency Selection ---#
-    def FrequencyCurSelect(self):
+    def FrequencyCurSelect(self,event):
         global frequency_list, frequency_dict, LowFrequency, HighFrequency, HighLowList
 
         frequency_list = [self.FrequencyList.get(idx) for idx in self.FrequencyList.curselection()]
@@ -4789,43 +4789,43 @@ class PostAnalysis(tk.Frame):
         CloseButton.grid(row=16,column=0,columnspan=2,pady=10)
 
 
-    def ElectrodeCurSelect(self,event):
+    # def ElectrodeCurSelect(self,event):
 
-        ###################################################
-        ## electrode_list: list; ints                    ##
-        ## electrode_dict: dict; {electrode: index}      ##
-        ## electrode_count: int                          ##
-        ###################################################
-        print(event)
+    #     ###################################################
+    #     ## electrode_list: list; ints                    ##
+    #     ## electrode_dict: dict; {electrode: index}      ##
+    #     ## electrode_count: int                          ##
+    #     ###################################################
+    #     print(event)
         
-        self.electrode_list = [self.ElectrodeCount.get(idx) for idx in self.ElectrodeCount.curselection()]
-        self.electrode_list = [int(electrode) for electrode in self.electrode_list]
+    #     self.electrode_list = [self.ElectrodeCount.get(idx) for idx in self.ElectrodeCount.curselection()]
+    #     self.electrode_list = [int(electrode) for electrode in self.electrode_list]
 
-        if electrode_count is 0:
-            self.ElectrodeListExists = False
-            self.ElectrodeLabel['fg'] = 'red'
+    #     if electrode_count is 0:
+    #         self.ElectrodeListExists = False
+    #         self.ElectrodeLabel['fg'] = 'red'
 
-        elif electrode_count is not 0:
-            self.ElectrodeListExists = True
-            self.ElectrodeLabel['fg'] = 'black'
+    #     elif electrode_count is not 0:
+    #         self.ElectrodeListExists = True
+    #         self.ElectrodeLabel['fg'] = 'black'
 
     #--- Frequency Selection ---#
-    def FrequencyCurSelect(self):
-        global frequency_list, frequency_dict, LowFrequency, HighFrequency
+    # def FrequencyCurSelect(self):
+    #     global frequency_list, frequency_dict, LowFrequency, HighFrequency
 
-        self.frequency_list = [self.FrequencyList.get(idx) for idx in self.FrequencyList.curselection()]
+    #     self.frequency_list = [self.FrequencyList.get(idx) for idx in self.FrequencyList.curselection()]
 
-        if len(frequency_list) is not 0:
+    #     if len(frequency_list) is not 0:
 
-            self.FrequencyListExists = True
-            self.FrequencyLabel['fg'] = 'black'
+    #         self.FrequencyListExists = True
+    #         self.FrequencyLabel['fg'] = 'black'
 
-            for var in frequency_list:
-                var = int(var)
+    #         for var in frequency_list:
+    #             var = int(var)
 
-        elif len(frequency_list) is 0:
-            self.FrequencyListExists = False
-            self.FrequencyLabel['fg'] = 'red'
+    #     elif len(frequency_list) is 0:
+    #         self.FrequencyListExists = False
+    #         self.FrequencyLabel['fg'] = 'red'
 
 
     def FindFile(self, parent):
@@ -5521,6 +5521,9 @@ if __name__ == '__main__':
         #--- initiate the mainloop ---#
         try:
             root.mainloop()
+            for element in frequency_list:
+                print("THIS IS A TEST")
+                print(element)
         #--- escape scrolling error ---#
         except UnicodeDecodeError:
             pass
