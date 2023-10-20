@@ -933,7 +933,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
     ### they have, initialize the program                             ###
     #####################################################################
     def CheckPoint(self):
-        global mypath, Option, FileHandle, SelectedOptions, ExportFilePath, AlreadyInitiated, delimeter
+        global mypath, Option, FileHandle, SelectedOptions, ExportFilePath, AlreadyInitiated, delimiter
 
         try:
             #--- check to see if the data analysis method has been selected by the user ---#
@@ -1066,8 +1066,8 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         ################################################################
         if not self.NoSelection:
             if FoundFilePath:
-
                 checkpoint = CheckPoint(self.parent, self.controller)
+                
 
 #---------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------------------------#
