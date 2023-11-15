@@ -36,6 +36,8 @@ from operator import truediv
 import threading
 from threading import Thread
 from queue import Queue
+
+import helper
 style.use('ggplot')
 
 #---Filter out error warnings---#
@@ -55,14 +57,15 @@ HUGE_FONT,LARGE_FONT,MEDIUM_FONT,SMALL_FONT = Config.font_specification()
 method=""
 
 
-def _retrieve_file(file, electrode, frequency,method):
-    try:
-        if method == 'Continuous Scan':
-            helper.process_continuous_scan(e_var,handle_variable,frequency,file,extension,electrode)
-        elif method == 'Frequency Map':
-            helper.process_Frequencymap(e_var,handle_variable, frequency, file, extension,electrode)
-    except:
-        print('\nError in retrieve_file\n')
+def _retrieve_file(file, electrode, frequency):
+    #try:
+    if method == 'Continuous Scan':
+        files = helper.process_continuous_scan(e_var,handle_variable,frequency,file,extension,electrode)
+    elif method == 'Frequency Map':
+        files = helper.process_Frequencymap(e_var,handle_variable, frequency, file, extension,electrode)
+    return files
+    #except:
+     #  print('\nError in retrieve_file\n')
 
 def ReadData(myfile, electrode):
     global encoding
@@ -578,7 +581,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         Methods = ['Continuous Scan','Frequency Map']
         MethodsLabel = tk.Label(self, text='Select Analysis Method', font=LARGE_FONT)
         self.MethodsBox = Listbox(self, relief='groove', exportselection=0, font=LARGE_FONT, height=len(Methods), selectmode='single', bd=3)
-        self.MethodsBox.bind('<<ListboxSelect>>', self.SelectMethod())
+        self.MethodsBox.bind('<<ListboxSelect>>', self.SelectMethod)
         MethodsLabel.grid(row=row_value,column=0,columnspan=4)
         row_value += 1
         self.MethodsBox.grid(row=row_value,column=0,columnspan=4)
@@ -837,16 +840,17 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             print('\n\nInputPage.FindFile: Could Not Find File Path\n\n')
 
     #--- Analysis Method ---#
-    def SelectMethod(self):
-            global method
-            selection = self.MethodsBox.curselection()
-            if selection:
-                method = str(self.MethodsBox.get(selection))
-            else:
-        # Handle the case when no item is selected
-                method = "No selection"
+    def SelectMethod(self, event):
+        global method
+        selection = self.MethodsBox.curselection()
+        if selection:
+            method = str(self.MethodsBox.get(selection))
+        else:
+            # Handle the case when no item is selected
+            method = "No selection"
+        print(f'Chose method {method}')
 
-    #--- Analysis Method ---#
+    #--- Analysis method ---#
     def SelectPlotOptions(self,event):
         global SelectedOptions
         SelectedOptions = str((self.PlotOptions.get(self.PlotOptions.curselection())))
@@ -933,7 +937,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
     ### they have, initialize the program                             ###
     #####################################################################
     def CheckPoint(self):
-        global mypath, Option, FileHandle, SelectedOptions, ExportFilePath, AlreadyInitiated, delimiter
+        global mypath, Option, FileHandle, SelectedOptions, ExportFilePath, AlreadyInitiated, delimeter
 
         try:
             #--- check to see if the data analysis method has been selected by the user ---#
@@ -1066,8 +1070,8 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         ################################################################
         if not self.NoSelection:
             if FoundFilePath:
+
                 checkpoint = CheckPoint(self.parent, self.controller)
-                
 
 #---------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------------------------------------------------------------------------#
@@ -1138,20 +1142,22 @@ class CheckPoint():
         self.electrode_limit = electrode_count - 1
         self.frequency_limit = len(frequency_list) - 1
 
-
         root.after(50,self.verify)
 
     def verify(self):
 
         self.electrode = electrode_list[self.num]
-
         if not self.StopSearch:
 
             if method == 'Continuous Scan':
                 for frequency in frequency_list:
-
+                    print(method)
+                    print(self.electrode)
+                    print(frequency)
+                    print(method)
                     filename, filename2, filename3, filename4 = _retrieve_file(1,self.electrode,frequency)
-
+                    print(filename, filename2, filename3, filename4)
+                    
                     myfile = mypath + filename               ### path of your file
                     myfile2 = mypath + filename2
                     myfile3 = mypath + filename3
@@ -1174,6 +1180,8 @@ class CheckPoint():
                                     myfile = myfile4
                                 except:
                                     mydata_bytes = 1
+                    
+                    print('Searching for file %s' % myfile)
 
 
                     if mydata_bytes > byte_limit:
@@ -1206,7 +1214,6 @@ class CheckPoint():
                 if self.analysis_count < self.analysis_limit:
                     if not self.StopSearch:
                         root.after(100,self.verify)
-
 
 
             elif method == 'Frequency Map':
