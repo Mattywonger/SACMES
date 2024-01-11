@@ -47,13 +47,15 @@ warnings.filterwarnings(action="ignore", module="scipy", message="^internal gels
 
 
 handle_variable,e_var,PHE_method,InputFrequencies,electrodes = Config.globalvar_config()
+high_xstart = None
+high_xend = None
+low_xstart = None
+low_xend = None
 sg_window,sg_degree,polyfit_deg,cutoff_frequency = Config.regressionvar_config()
 key,search_lim,PoisonPill,FoundFilePath,ExistVar,AlreadyInitiated,HighAlreadyReset,LowAlreadyReset,analysis_complete= Config.checkpoint_parameter()
 delimiter,extension,current_column,current_column_index,voltage_column,voltage_column_index,spacing_index,byte_limit,byte_index = Config.data_extraction_parameter()
 LowFrequencyOffset,LowFrequencySlope = Config.low_freq_parameter()
 HUGE_FONT,LARGE_FONT,MEDIUM_FONT,SMALL_FONT = Config.font_specification()
-#Global variables
-
 method=""
 
 
@@ -272,7 +274,7 @@ class MainWindow(tk.Tk):
         container.grid(row=row_value,column=0,columnspan=2,padx=5,pady=5,ipadx=3)
 
         container_value = 0
-        l = tk.Label(container, text="Current is in Column:")
+        l = ttk.Label(container, text="Current is in Column:")
         l.grid(row=container_value, column=0)
 
         container_value += 1
@@ -281,7 +283,7 @@ class MainWindow(tk.Tk):
         self.list_val_entry.grid(row=container_value,column=0,pady=5)
 
         container_value = 0
-        l = tk.Label(container, text="Voltage is in Column:")
+        l = ttk.Label(container, text="Voltage is in Column:")
         l.grid(row=container_value, column=1)
 
         container_value += 1
@@ -290,14 +292,14 @@ class MainWindow(tk.Tk):
         self.voltage_column.grid(row=container_value,column=1,pady=5)
 
         container_value += 1
-        l = tk.Label(container, text="Multipotentiostat Settings\nSpace Between Current Columns:")
+        l = ttk.Label(container, text="Multipotentiostat Settings\nSpace Between Current Columns:")
         l.grid(row=container_value, column=0,columnspan=2)
 
         #-- frameception --#
         container_value += 1
         inner_frame = tk.Frame(container)
         inner_frame.grid(row=container_value,column=0,columnspan=2)
-        self.spacing_label = tk.Label(inner_frame, text = '\t         Columns').grid(row=0,column=0)
+        self.spacing_label = ttk.Label(inner_frame, text = '\t         Columns').grid(row=0,column=0)
 
         self.spacing_val_entry = tk.Entry(inner_frame, width=4)
         self.spacing_val_entry.insert(END,3)
@@ -310,7 +312,7 @@ class MainWindow(tk.Tk):
         box.grid(row=row_value,column=0,columnspan=2,pady=7)
 
         box_value = 0
-        l = tk.Label(box, text="Delimiter between\ndata columns:")
+        l = ttk.Label(box, text="Delimiter between\ndata columns:")
         l.grid(row=box_value, column=0)
 
         box_value += 1
@@ -326,7 +328,7 @@ class MainWindow(tk.Tk):
         self.tab_delimiter.grid(row=box_value, column=0,pady=3)
 
         box_value = 0
-        l = tk.Label(box, text="File Extension")
+        l = ttk.Label(box, text="File Extension")
         l.grid(row=box_value, column=1)
 
         box_value += 1
@@ -386,7 +388,8 @@ class MainWindow(tk.Tk):
         self.master.quit()
         quit()
 
-class InputFrame(tk.Frame):                         # first frame that is displayed when the program is initialized
+class InputFrame(tk.Frame):
+                             # first frame that is displayed when the program is initialized
     def __init__(self, parent, controller,method):
         global figures, StartNormalizationVar, SaveBox, ManipulateFrequenciesFrame
 
@@ -406,16 +409,21 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         self.SelectFilePath.grid(row=row_value,column=0,columnspan=4)
         row_value += 2
 
-        self.NoSelectedPath = tk.Label(self, text = 'No File Path Selected', fg = 'red')
+        self.NoSelectedPath = ttk.Label(self, text = 'No File Path Selected', foreground = 'red')
         self.PathWarningExists = False               # tracks the existence of a warning label
 
-        ImportFileLabel = tk.Label(self, text = 'Import File Label', font=LARGE_FONT).grid(row=row_value,column=0,columnspan=2)
+        #ImportFileLabel = ttk.Label(self, text='Import File Label', font=('Verdana', 11))
+        #ImportFileLabel.grid(row=row_value, column=0, columnspan=2)
+
         self.ImportFileEntry = tk.Entry(self)
         self.ImportFileEntry.grid(row=row_value+1,column=0,columnspan=2,pady=5)
         self.ImportFileEntry.insert(END, handle_variable)
 
         #--- File Handle Input ---#
-        HandleLabel = tk.Label(self, text='Exported File Handle:', font=LARGE_FONT)
+
+
+
+        HandleLabel = ttk.Label(self, text='Exported File Handle:', font=('Verdana', 10))
         HandleLabel.grid(row=row_value,column=2,columnspan=2)
         self.filehandle = tk.Entry(self)
         now = datetime.datetime.now()
@@ -428,18 +436,18 @@ class InputFrame(tk.Frame):                         # first frame that is displa
 
         row_value += 2
 
-        EmptyLabel = tk.Label(self, text = '',font=LARGE_FONT).grid(row=row_value,rowspan=2,column=0,columnspan=10)
+        EmptyLabel = ttk.Label(self, text = '',font=('Verdana', 11)).grid(row=row_value,rowspan=2,column=0,columnspan=10)
         row_value += 1
 
         #---File Limit Input---#
-        numFileLabel = tk.Label(self, text='Number of Files:', font=LARGE_FONT)
+        numFileLabel = ttk.Label(self, text='Number of Files:', font=('Verdana', 11))
         numFileLabel.grid(row=row_value,column=0,columnspan=2,pady=4)
         self.numfiles = tk.Entry(self, width=7)
         self.numfiles.insert(END, '50')
         self.numfiles.grid(row=row_value+1,column=0,columnspan=2,pady=6)
 
         #--- Analysis interval for event callback in ElectrochemicalAnimation ---#
-        IntervalLabel = tk.Label(self, text='Analysis Interval (ms):', font=LARGE_FONT)
+        IntervalLabel = ttk.Label(self, text='Analysis Interval (ms):', font=('Verdana', 11))
         IntervalLabel.grid(row=row_value,column=2,columnspan=2,pady=4)
         self.Interval = tk.Entry(self, width=7)
         self.Interval.insert(END, '10')
@@ -448,13 +456,13 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         row_value += 2
 
         #---Sample Rate Variable---#
-        SampleLabel = tk.Label(self, text='Sampling Rate (s):', font=LARGE_FONT)
+        SampleLabel = ttk.Label(self, text='Sampling Rate (s):', font=('Verdana', 11))
         SampleLabel.grid(row=row_value,column=0,columnspan=2)
         self.sample_rate = tk.Entry(self, width=7)
         self.sample_rate.insert(END, '20')
         self.sample_rate.grid(row=row_value+1,column=0,columnspan=2)
 
-        self.resize_label = tk.Label(self, text='Resize Interval', font = LARGE_FONT)
+        self.resize_label = ttk.Label(self, text='Resize Interval', font = LARGE_FONT)
         self.resize_label.grid(row=row_value,column=2,columnspan=2)
         self.resize_entry = tk.Entry(self, width = 7)
         self.resize_entry.insert(END,'200')
@@ -476,9 +484,9 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         self.ElectrodeListboxFrame.columnconfigure(1, weight=1)
 
         self.ElectrodeListExists = False
-        self.ElectrodeLabel = tk.Label(self.ElectrodeListboxFrame, text='Select Electrodes:', font=LARGE_FONT)
+        self.ElectrodeLabel = ttk.Label(self.ElectrodeListboxFrame, text='Select Electrodes:', font=('Verdana', 11))
         self.ElectrodeLabel.grid(row=0,column=0,columnspan=2, sticky = 'nswe')
-        self.ElectrodeCount = Listbox(self.ElectrodeListboxFrame, relief='groove', exportselection=0, width=10, font=LARGE_FONT, height=6, selectmode = 'multiple', bd=3)
+        self.ElectrodeCount = Listbox(self.ElectrodeListboxFrame, relief='groove', exportselection=0, width=10, font=('Verdana', 11), height=6, selectmode = 'multiple', bd=3)
         self.ElectrodeCount.bind('<<ListboxSelect>>',self.ElectrodeCurSelect)
         self.ElectrodeCount.grid(row=1,column=0,columnspan=2,sticky='nswe')
         for electrode in electrodes:
@@ -520,7 +528,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         self.ListboxFrame.rowconfigure(1, weight=1)
         self.ListboxFrame.columnconfigure(0, weight=1)
 
-        self.FrequencyLabel = tk.Label(self.ListboxFrame, text='Select Frequencies', font= LARGE_FONT)
+        self.FrequencyLabel = ttk.Label(self.ListboxFrame, text='Select Frequencies', font= LARGE_FONT)
         self.FrequencyLabel.grid(row=0,padx=10)
 
         #--- If more than 5 frequencies are in the listbox, add a scrollbar as to not take up too much space ---#
@@ -533,7 +541,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         self.FrequencyListExists = False
 
         #--- ListBox containing the frequencies given on line 46 (InputFrequencies) ---#
-        self.FrequencyList = Listbox(self.ListboxFrame, relief='groove', exportselection=0, width=5, font=LARGE_FONT, height = 6, selectmode='multiple', bd=3)
+        self.FrequencyList = Listbox(self.ListboxFrame, relief='groove', exportselection=0, width=5, font=('Verdana', 11), height = 6, selectmode='multiple', bd=3)
         self.FrequencyList.bind('<<ListboxSelect>>',self.FrequencyCurSelect)
         self.FrequencyList.grid(row=1,padx=10,sticky='nswe')
         for frequency in frequencies:
@@ -555,7 +563,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         ManipulateFrequenciesFrame = tk.Frame(self, width=10, bd = 3, relief = 'groove')
         ManipulateFrequenciesFrame.grid(row=row_value,column=2,columnspan=2,padx=10,pady=10, sticky='nsew')
 
-        ManipulateFrequencyLabel = tk.Label(ManipulateFrequenciesFrame, text = 'Enter Frequency(s)')
+        ManipulateFrequencyLabel = ttk.Label(ManipulateFrequenciesFrame, text = 'Enter Frequency(s)')
         ManipulateFrequencyLabel.grid(row=0,column=0,columnspan=4)
 
         self.FrequencyEntry = tk.Entry(ManipulateFrequenciesFrame, width=8)
@@ -579,8 +587,8 @@ class InputFrame(tk.Frame):                         # first frame that is displa
 
         #--- Select Analysis Method---#
         Methods = ['Continuous Scan','Frequency Map']
-        MethodsLabel = tk.Label(self, text='Select Analysis Method', font=LARGE_FONT)
-        self.MethodsBox = Listbox(self, relief='groove', exportselection=0, font=LARGE_FONT, height=len(Methods), selectmode='single', bd=3)
+        MethodsLabel = ttk.Label(self, text='Select Analysis Method', font=('Verdana', 11))
+        self.MethodsBox = Listbox(self, relief='groove', exportselection=0, font=('Verdana', 11), height=len(Methods), selectmode='single', bd=3)
         self.MethodsBox.bind('<<ListboxSelect>>', self.SelectMethod)
         MethodsLabel.grid(row=row_value,column=0,columnspan=4)
         row_value += 1
@@ -592,8 +600,8 @@ class InputFrame(tk.Frame):                         # first frame that is displa
 
         #--- Select Data to be Plotted ---#
         Options = ['Peak Height Extraction','Area Under the Curve']
-        OptionsLabel = tk.Label(self, text='Select Data to be Plotted', font=LARGE_FONT)
-        self.PlotOptions = Listbox(self, relief='groove', exportselection=0, font=LARGE_FONT, height=len(Options), selectmode='single', bd=3)
+        OptionsLabel = ttk.Label(self, text='Select Data to be Plotted', font=('Verdana', 11))
+        self.PlotOptions = Listbox(self, relief='groove', exportselection=0, font=('Verdana', 11), height=len(Options), selectmode='single', bd=3)
         self.PlotOptions.bind('<<ListboxSelect>>', self.SelectPlotOptions)
         OptionsLabel.grid(row=row_value,column=0,columnspan=2)
         self.PlotOptions.grid(row=row_value+1,column=0,columnspan=2)
@@ -602,14 +610,14 @@ class InputFrame(tk.Frame):                         # first frame that is displa
             self.PlotOptions.insert(END, option)
 
         #--- Warning label for if the user does not select an analysis method ---#
-        self.NoOptionsSelected = tk.Label(self, text = 'Select a Data Analysis Method', fg='red')   # will only be added to the grid (row 16) if they dont select an option
+        self.NoOptionsSelected = ttk.Label(self, text = 'Select a Data Analysis Method', foreground='red')   # will only be added to the grid (row 16) if they dont select an option
         self.NoSelection = False
 
 
         #--- Select units of the X-axis ---#
         PlotOptions = ['Experiment Time','File Number']
-        PlotLabel = tk.Label(self, text='Select X-axis units', font=LARGE_FONT)
-        self.XaxisOptions = Listbox(self, relief='groove', exportselection=0, font=LARGE_FONT, height=len(PlotOptions), selectmode='single', bd=3)
+        PlotLabel = ttk.Label(self, text='Select X-axis units', font=('Verdana', 11))
+        self.XaxisOptions = Listbox(self, relief='groove', exportselection=0, font=('Verdana', 11), height=len(PlotOptions), selectmode='single', bd=3)
         self.XaxisOptions.bind('<<ListboxSelect>>', self.SelectXaxisOptions)
         PlotLabel.grid(row=row_value,column=2,columnspan=2)
         self.XaxisOptions.grid(row=row_value+1,column=2,columnspan=2)
@@ -636,60 +644,60 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         AdjustmentFrame.columnconfigure(3, weight=1)
 
         #--- Y Limit Adjustment Variables ---#
-        self.y_limit_parameter_label = tk.Label(AdjustmentFrame, text = 'Select Y Limit Parameters',font=LARGE_FONT)
+        self.y_limit_parameter_label = ttk.Label(AdjustmentFrame, text = 'Select Y Limit Parameters',font=('Verdana', 11))
         self.y_limit_parameter_label.grid(row=0,column=0,columnspan=4,pady=5,padx=5)
 
         #--- Raw Data Minimum Parameter Adjustment ---#
-        self.raw_data_min_parameter_label = tk.Label(AdjustmentFrame, text = 'Raw Min. Factor',font=MEDIUM_FONT)
+        self.raw_data_min_parameter_label = ttk.Label(AdjustmentFrame, text = 'Raw Min. Factor',font=('Verdana', 10))
         self.raw_data_min_parameter_label.grid(row=1,column=0)
         self.raw_data_min = tk.Entry(AdjustmentFrame, width=5)
         self.raw_data_min.insert(END, '2')                   # initial minimum is set to 0.5*minimum current (baseline) of file 1
         self.raw_data_min.grid(row=2,column=0,padx=5,pady=2,ipadx=2)
 
         #--- Raw Data Maximum Parameter Adjustment ---#
-        self.raw_data_max_parameter_label = tk.Label(AdjustmentFrame, text = 'Raw Max. Factor',font=MEDIUM_FONT)
+        self.raw_data_max_parameter_label = ttk.Label(AdjustmentFrame, text = 'Raw Max. Factor',font=('Verdana', 10))
         self.raw_data_max_parameter_label.grid(row=3,column=0)
         self.raw_data_max = tk.Entry(AdjustmentFrame, width=5)
         self.raw_data_max.insert(END, '2')                      # initial adjustment is set to 2x the max current (Peak Height) of file 1
         self.raw_data_max.grid(row=4,column=0,padx=5,pady=2,ipadx=2)
 
         #--- Raw Data Minimum Parameter Adjustment ---#
-        self.data_min_parameter_label = tk.Label(AdjustmentFrame, text = 'Data Min. Factor',font=MEDIUM_FONT)
+        self.data_min_parameter_label = ttk.Label(AdjustmentFrame, text = 'Data Min. Factor',font=('Verdana', 10))
         self.data_min_parameter_label.grid(row=1,column=1)
         self.data_min = tk.Entry(AdjustmentFrame, width=5)
         self.data_min.insert(END, '2')                   # initial minimum is set to 0.5*minimum current (baseline) of file 1
         self.data_min.grid(row=2,column=1,padx=5,pady=2,ipadx=2)
 
         #--- Raw Data Maximum Parameter Adjustment ---#
-        self.data_max_parameter_label = tk.Label(AdjustmentFrame, text = 'Data Max. Factor',font=MEDIUM_FONT)
+        self.data_max_parameter_label = ttk.Label(AdjustmentFrame, text = 'Data Max. Factor',font=('Verdana', 10))
         self.data_max_parameter_label.grid(row=3,column=1)
         self.data_max = tk.Entry(AdjustmentFrame, width=5)
         self.data_max.insert(END, '2')                      # initial adjustment is set to 2x the max current (Peak Height) of file 1
         self.data_max.grid(row=4,column=1,padx=5,pady=2,ipadx=2)
 
         #--- Normalized Data Minimum Parameter Adjustment ---#
-        self.norm_data_min_parameter_label = tk.Label(AdjustmentFrame, text = 'Norm. Min.',font=MEDIUM_FONT)
+        self.norm_data_min_parameter_label = ttk.Label(AdjustmentFrame, text = 'Norm. Min.',font=('Verdana', 10))
         self.norm_data_min_parameter_label.grid(row=1,column=2)
         self.norm_data_min = tk.Entry(AdjustmentFrame, width=5)
         self.norm_data_min.insert(END, '0')                      # initial minimum is set to 0
         self.norm_data_min.grid(row=2,column=2,padx=5,pady=2,ipadx=2)
 
         #--- Normalized Data Maximum Parameter Adjustment ---#
-        self.norm_data_max_parameter_label = tk.Label(AdjustmentFrame, text = 'Norm. Max.',font=MEDIUM_FONT)
+        self.norm_data_max_parameter_label = ttk.Label(AdjustmentFrame, text = 'Norm. Max.',font=('Verdana', 10))
         self.norm_data_max_parameter_label.grid(row=3,column=2)
         self.norm_data_max = tk.Entry(AdjustmentFrame, width=5)
         self.norm_data_max.insert(END, '2')                      # initial maximum is set to 2
         self.norm_data_max.grid(row=4,column=2,padx=5,pady=2,ipadx=2)
 
         #--- Raw Data Minimum Parameter Adjustment ---#
-        self.KDM_min_label = tk.Label(AdjustmentFrame, text = 'KDM Min.',font=MEDIUM_FONT)
+        self.KDM_min_label = ttk.Label(AdjustmentFrame, text = 'KDM Min.',font=('Verdana', 10))
         self.KDM_min_label.grid(row=1,column=3)
         self.KDM_min = tk.Entry(AdjustmentFrame, width=5)
         self.KDM_min.insert(END, '0')                   # initial minimum is set to 0.5*minimum current (baseline) of file 1
         self.KDM_min.grid(row=2,column=3,padx=5,pady=2,ipadx=2)
 
         #--- Raw Data Maximum Parameter Adjustment ---#
-        self.KDM_Max_label = tk.Label(AdjustmentFrame, text = 'KDM Max. ',font=MEDIUM_FONT)
+        self.KDM_Max_label = ttk.Label(AdjustmentFrame, text = 'KDM Max. ',font=('Verdana', 10))
         self.KDM_Max_label.grid(row=3,column=3)
         self.KDM_max = tk.Entry(AdjustmentFrame, width=5)
         self.KDM_max.insert(END, '2')                      # initial adjustment is set to 2x the max current (Peak Height) of file 1
@@ -881,11 +889,11 @@ class InputFrame(tk.Frame):                         # first frame that is displa
 
         if electrode_count == 0:
             self.ElectrodeListExists = False
-            self.ElectrodeLabel['fg'] = 'red'
+            self.ElectrodeLabel['foreground'] = 'red'
 
         elif electrode_count != 0:
             self.ElectrodeListExists = True
-            self.ElectrodeLabel['fg'] = 'black'
+            self.ElectrodeLabel['foreground'] = 'black'
 
     #--- Frequency Selection ---#
     def FrequencyCurSelect(self,event):
@@ -897,7 +905,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
         if len(frequency_list) != 0:
 
             self.FrequencyListExists = True
-            self.FrequencyLabel['fg'] = 'black'
+            self.FrequencyLabel['foreground'] = 'black'
 
             for var in frequency_list:
                 var = int(var)
@@ -918,7 +926,7 @@ class InputFrame(tk.Frame):                         # first frame that is displa
 
         elif len(frequency_list) == 0:
             self.FrequencyListExists = False
-            self.FrequencyLabel['fg'] = 'red'
+            self.FrequencyLabel['foreground'] = 'red'
 
 
     #--- Functions to switch frames and plots ---#
@@ -972,14 +980,14 @@ class InputFrame(tk.Frame):                         # first frame that is displa
                 self.PathWarningExists = True
 
         if not self.FrequencyListExists:
-            self.FrequencyLabel['fg'] = 'red'
+            self.FrequencyLabel['foreground'] = 'red'
         elif self.FrequencyListExists:
-            self.FrequencyLabel['fg'] = 'black'
+            self.FrequencyLabel['foreground'] = 'black'
 
         if not self.ElectrodeListExists:
-            self.ElectrodeLabel['fg'] = 'red'
+            self.ElectrodeLabel['foreground'] = 'red'
         elif self.ElectrodeListExists:
-            self.ElectrodeLabel['fg'] = 'black'
+            self.ElectrodeLabel['foreground'] = 'black'
 
         if not self.PathWarningExists:
             if not self.NoSelection:
@@ -1090,7 +1098,7 @@ class CheckPoint():
         self.win = tk.Toplevel()
         self.win.wm_title("CheckPoint")
 
-        title = tk.Label(self.win, text = 'Searching for files...',font=HUGE_FONT).grid(row=0,column=0,columnspan=2,pady=10,padx=10,sticky='news')
+        title = ttk.Label(self.win, text = 'Searching for files...',font=('Verdana', 18)).grid(row=0,column=0,columnspan=2,pady=10,padx=10,sticky='news')
 
         self.parent = parent
         self.win.transient(self.parent)
@@ -1102,7 +1110,7 @@ class CheckPoint():
         self.label_dict = {}
         self.already_verified = {}
         for electrode in electrode_list:
-            electrode_label = tk.Label(self.win, text = 'E%s' % electrode,font=LARGE_FONT).grid(row=row_value,column=0,pady=5,padx=5)
+            electrode_label = ttk.Label(self.win, text = 'E%s' % electrode,font=('Verdana', 11)).grid(row=row_value,column=0,pady=5,padx=5)
             frame = tk.Frame(self.win, relief='groove',bd=5)
             frame.grid(row = row_value,column=1,pady=5,padx=5)
             self.frame_dict[electrode] = frame
@@ -1113,14 +1121,14 @@ class CheckPoint():
             column_value = 0
             if method == 'Continuous Scan':
                 for frequency in frequency_list:
-                    label = tk.Label(frame, text = '%sHz' % str(frequency), fg = 'red')
+                    label = ttk.Label(frame, text = '%sHz' % str(frequency), foreground = 'red')
                     label.grid(row=0,column=column_value,padx=5,pady=5)
                     self.label_dict[electrode][frequency] = label
                     self.already_verified[electrode][frequency] = False
                     column_value += 1
 
             elif method == 'Frequency Map':
-                electrode_label = tk.Label(frame, text = 'E%s' % electrode,font=HUGE_FONT)
+                electrode_label = ttk.Label(frame, text = 'E%s' % electrode,font=('Verdana', 18))
                 electrode_label.grid(row=row_value,column=column_value,pady=5,padx=5)
                 self.label_dict[electrode][frequency_list[0]] = electrode_label
                 self.already_verified[electrode][frequency_list[0]] = False
@@ -1195,7 +1203,7 @@ class CheckPoint():
                             if not self.already_verified[self.electrode][frequency]:
                                 self.already_verified[self.electrode][frequency] = True
                                 if not self.StopSearch:
-                                    self.label_dict[self.electrode][frequency]['fg'] = 'green'
+                                    self.label_dict[self.electrode][frequency]['foreground'] = 'green'
                                     self.analysis_count += 1
 
                         if self.analysis_count == self.analysis_limit:
@@ -1266,7 +1274,7 @@ class CheckPoint():
                         if not self.already_verified[self.electrode][frequency]:
                             self.already_verified[self.electrode][frequency] = True
                             if not self.StopSearch:
-                                self.label_dict[self.electrode][frequency]['fg'] = 'green'
+                                self.label_dict[self.electrode][frequency]['foreground'] = 'green'
                                 self.analysis_count += 1
 
                     if self.analysis_count == electrode_count:
@@ -1399,7 +1407,8 @@ class CheckPoint():
             frame.grid(row=0, column=0, sticky='nsew')
 
         #---When initliazed, raise the Start Page and the plot for electrode one---#
-        self.show_frame(method)              # raises the frame for real-time data manipulation
+        self.show_frame(method)   
+        print("The length of plotvalues is" + str(len(PlotValues)))           # raises the frame for real-time data manipulation
         self.show_plot(PlotValues[0])           # raises the figure for electrode 1
 
 
@@ -1443,19 +1452,19 @@ class ContinuousScanManipulationFrame(tk.Frame):
         #######################################
 
         #--- Display the file number ---#
-        FileTitle = tk.Label(self, text = 'File Number', font=MEDIUM_FONT,)
+        FileTitle = ttk.Label(self, text = 'File Number', font=('Verdana', 10),)
         FileTitle.grid(row=0,column=0,padx=5,pady=5)
-        FileLabel = tk.Label(self, text = '1', font=LARGE_FONT, style='Fun.TButton')
+        FileLabel = ttk.Label(self, text = '1', style="LARGE_FONT,Fun.TButton")
         FileLabel.grid(row=1,column=0,padx=5,pady=5)
 
         #--- Display the experiment duration as a function of the user-inputted Sample Rate ---#
-        SampleTitle = tk.Label(self, text = 'Experiment Time (h)', font=MEDIUM_FONT)
+        SampleTitle = ttk.Label(self, text = 'Experiment Time (h)', font=('Verdana', 10))
         SampleTitle.grid(row=0,column=1,padx=5,pady=5)
-        RealTimeSampleLabel = tk.Label(self, text = '0', style='Fun.TButton')
+        RealTimeSampleLabel = ttk.Label(self, text = '0', style='Fun.TButton')
         RealTimeSampleLabel.grid(row=1,column=1,padx=5,pady=5)
 
         #--- Real-time Normalization Variable ---#
-        SetPointNormLabel = tk.Label(self, text = 'Set Normalization Point', font=MEDIUM_FONT)
+        SetPointNormLabel = ttk.Label(self, text = 'Set Normalization Point', font=('Verdana', 10))
         NormalizationVar = tk.StringVar()
         NormString = str(3)
         NormalizationVar.set(NormString)
@@ -1464,7 +1473,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
 
         #--- Button to apply any changes to the normalization variable ---#
         NormalizeButton = ttk.Button(self, text='Apply Norm', command = lambda: self.RealTimeNormalization(), width=10)
-        self.NormWarning = tk.Label(self,text='',fg='red',font=MEDIUM_FONT)
+        self.NormWarning = ttk.Label(self,text='',foreground='red',font=('Verdana', 10))
         NormWarning = self.NormWarning
 
         if InjectionVar:
@@ -1482,7 +1491,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
 
 
         #--- Real-time Injection tracking ---#
-        SetInjectionLabel = tk.Label(self, text = 'Set Injection Range', font=MEDIUM_FONT)
+        SetInjectionLabel = ttk.Label(self, text = 'Set Injection Range', font=('Verdana', 10))
         InjectionButton = ttk.Button(self, text='Apply Injection', command = lambda: self.RealTimeInjection(), width=10)
         self.SetInjectionPoint = tk.Entry(self, width=8)
 
@@ -1501,11 +1510,11 @@ class ContinuousScanManipulationFrame(tk.Frame):
             self.FrequencyFrame.grid(row=row_value,column=0,columnspan=4,pady=2,padx=3,ipady=2)
 
             #--- Drift Correction Title ---#
-            self.KDM_title = tk.Label(self.FrequencyFrame, text = 'Drift Correction', font=LARGE_FONT)
+            self.KDM_title = ttk.Label(self.FrequencyFrame, text = 'Drift Correction', font=('Verdana', 11))
             self.KDM_title.grid(row=0,column=0,columnspan=3,pady=1,padx=5)
 
             #--- High Frequency Selection for KDM and Ratiometric Analysis ---#
-            self.HighFrequencyLabel = tk.Label(self.FrequencyFrame, text='High Frequency',font=MEDIUM_FONT)
+            self.HighFrequencyLabel = ttk.Label(self.FrequencyFrame, text='High Frequency',font=('Verdana', 10))
             self.HighFrequencyLabel.grid(row=1,column=1,pady=5,padx=5)
 
             HighFrequencyEntry = tk.Entry(self.FrequencyFrame, width=7)
@@ -1513,19 +1522,19 @@ class ContinuousScanManipulationFrame(tk.Frame):
             HighFrequencyEntry.grid(row=2,column=1,padx=5)
 
             #--- Low Frequency Selection for KDM and Ratiometric Analysis ---#
-            self.LowFrequencyLabel = tk.Label(self.FrequencyFrame, text='Low Frequency',font=MEDIUM_FONT)
+            self.LowFrequencyLabel = ttk.Label(self.FrequencyFrame, text='Low Frequency',font=('Verdana', 10))
             self.LowFrequencyLabel.grid(row=1,column=0,pady=5,padx=5)
 
             LowFrequencyEntry = tk.Entry(self.FrequencyFrame, width=7)
             LowFrequencyEntry.insert(END, LowFrequency)
             LowFrequencyEntry.grid(row=2,column=0,padx=5)
 
-            self.LowFrequencyOffsetLabel = tk.Label(self.FrequencyFrame, text = 'Low Frequency\n Offset', font=MEDIUM_FONT).grid(row=3,column=0,pady=2,padx=2)
+            self.LowFrequencyOffsetLabel = ttk.Label(self.FrequencyFrame, text = 'Low Frequency\n Offset', font=('Verdana', 10)).grid(row=3,column=0,pady=2,padx=2)
             self.LowFrequencyOffset = tk.Entry(self.FrequencyFrame, width=7)
             self.LowFrequencyOffset.insert(END,LowFrequencyOffset)
             self.LowFrequencyOffset.grid(row=4,column=0,padx=2,pady=2)
 
-            self.LowFrequencySlopeLabel = tk.Label(self.FrequencyFrame, text = 'Low Frequency\n Slope Manipulation', font=MEDIUM_FONT).grid(row=3,column=1,pady=2,padx=2)
+            self.LowFrequencySlopeLabel = ttk.Label(self.FrequencyFrame, text = 'Low Frequency\n Slope Manipulation', font=('Verdana', 10)).grid(row=3,column=1,pady=2,padx=2)
             self.LowFrequencySlope = tk.Entry(self.FrequencyFrame, width=7)
             self.LowFrequencySlope.insert(END,LowFrequencySlope)
             self.LowFrequencySlope.grid(row=4,column=1,padx=2,pady=2)
@@ -1552,14 +1561,14 @@ class ContinuousScanManipulationFrame(tk.Frame):
         row_value += 1
 
         #--- Title ---#
-        self.RegressionLabel = tk.Label(RegressionFrame, text = 'Real Time Analysis Manipulation', font=LARGE_FONT)
+        self.RegressionLabel = ttk.Label(RegressionFrame, text = 'Real Time Analysis Manipulation', font=('Verdana', 11))
         self.RegressionLabel.grid(row=0,column=0,columnspan=4,pady=5,padx=5)
 
 
         ###################################################################
         ### Real Time Manipulation of Savitzky-Golay Smoothing Function ###
         ###################################################################
-        self.SmoothingLabel = tk.Label(RegressionFrame, text = 'Savitzky-Golay Window (mV)', font = LARGE_FONT)
+        self.SmoothingLabel = ttk.Label(RegressionFrame, text = 'Savitzky-Golay Window (mV)', font = LARGE_FONT)
         self.SmoothingLabel.grid(row=1,column=0,columnspan=4,pady=1)
         self.SmoothingEntry = tk.Entry(RegressionFrame, width=10)
         self.SmoothingEntry.grid(row=2,column=0,columnspan=4,pady=3)
@@ -1591,14 +1600,14 @@ class ContinuousScanManipulationFrame(tk.Frame):
             ShowFrames['LowParameterFrame'] = LowParameterFrame
 
             #--- points discarded at the beginning of the voltammogram, xstart ---#
-            self.low_xstart_label = tk.Label(LowParameterFrame, text = 'xstart (V)', font=MEDIUM_FONT).grid(row=0,column=0)
+            self.low_xstart_label = ttk.Label(LowParameterFrame, text = 'xstart (V)', font=('Verdana', 10)).grid(row=0,column=0)
             self.low_xstart_entry = tk.Entry(LowParameterFrame, width=7)
             self.low_xstart_entry.insert(END, str(low_xstart))
             self.low_xstart_entry.grid(row=1,column=0)
             low_xstart_entry = self.low_xstart_entry
 
             #--- points discarded at the beginning of the voltammogram, xend ---#
-            self.low_xend_label = tk.Label(LowParameterFrame, text = 'xend (V)', font=MEDIUM_FONT).grid(row=0,column=1)
+            self.low_xend_label = ttk.Label(LowParameterFrame, text = 'xend (V)', font=('Verdana', 10)).grid(row=0,column=1)
             self.low_xend_entry = tk.Entry(LowParameterFrame, width=7)
             self.low_xend_entry.insert(END, str(low_xend))
             self.low_xend_entry.grid(row=1,column=1)
@@ -1619,14 +1628,14 @@ class ContinuousScanManipulationFrame(tk.Frame):
             ShowFrames['HighParameterFrame'] = HighParameterFrame
 
             #--- points discarded at the beginning of the voltammogram, xstart ---#
-            self.high_xstart_label = tk.Label(HighParameterFrame, text = 'xstart (V)', font=MEDIUM_FONT).grid(row=0,column=0)
+            self.high_xstart_label = ttk.Label(HighParameterFrame, text = 'xstart (V)', font=('Verdana', 10)).grid(row=0,column=0)
             self.high_xstart_entry = tk.Entry(HighParameterFrame, width=7)
             self.high_xstart_entry.insert(END, str(high_xstart))
             self.high_xstart_entry.grid(row=1,column=0)
             high_xstart_entry = self.high_xstart_entry
 
             #--- points discarded at the beginning of the voltammogram, xend ---#
-            self.high_xend_label = tk.Label(HighParameterFrame, text = 'xend (V)', font=MEDIUM_FONT).grid(row=0,column=1)
+            self.high_xend_label = ttk.Label(HighParameterFrame, text = 'xend (V)', font=('Verdana', 10)).grid(row=0,column=1)
             self.high_xend_entry = tk.Entry(HighParameterFrame, width=7)
             self.high_xend_entry.insert(END, str(high_xend))
             self.high_xend_entry.grid(row=1,column=1)
@@ -1646,7 +1655,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
 
 
         #--- Button to apply adjustments ---#
-        self.AdjustParameterButton = ttk.Button(RegressionFrame, text = 'Apply Adjustments', font=LARGE_FONT, command = lambda: self.AdjustParameters())
+        self.AdjustParameterButton = ttk.Button(RegressionFrame, text = 'Apply Adjustments', command = lambda: self.AdjustParameters())
         self.AdjustParameterButton.grid(row=5,column=0,columnspan=4,pady=10,padx=10)
 
 
@@ -1769,7 +1778,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
         if CheckVar == 3:
             if ExistVar:
                 WrongFrequencyLabel.grid_forget()
-            WrongFrequencyLabel = tk.Label(self.FrequencyFrame, text='High Frequency Does Not Exist', fg='red')
+            WrongFrequencyLabel = ttk.Label(self.FrequencyFrame, text='High Frequency Does Not Exist', foreground='red')
             WrongFrequencyLabel.grid(row=6,column=0,columnspan=4)
             if not ExistVar:
                 ExistVar = True
@@ -1778,7 +1787,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
         elif CheckVar == 1:
             if ExistVar:
                 WrongFrequencyLabel.grid_forget()
-            WrongFrequencyLabel = tk.Label(self.FrequencyFrame, text='Low Frequency Does Not Exist', fg='red')
+            WrongFrequencyLabel = ttk.Label(self.FrequencyFrame, text='Low Frequency Does Not Exist', foreground='red')
             WrongFrequencyLabel.grid(row=6,column=0,columnspan=4)
             if not ExistVar:
                 ExistVar = True
@@ -1787,7 +1796,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
         elif CheckVar == 4:
             if ExistVar:
                 WrongFrequencyLabel.grid_forget()
-            WrongFrequencyLabel = tk.Label(self.FrequencyFrame, text='High and Low Frequencies Do Not Exist', fg='red')
+            WrongFrequencyLabel = ttk.Label(self.FrequencyFrame, text='High and Low Frequencies Do Not Exist', foreground='red')
             WrongFrequencyLabel.grid(row=6,column=0,columnspan=4)
             if not ExistVar:
                 ExistVar = True
@@ -1823,7 +1832,7 @@ class ContinuousScanManipulationFrame(tk.Frame):
             wait_time.NormalizationWaitTime()
 
         elif NormalizationPoint > file:
-            NormWarning['fg'] = 'red'
+            NormWarning['foreground'] = 'red'
             NormWarning['text'] = 'File %s has \nnot been analyzed' % str(NormalizationPoint)
 
         if analysis_complete:
@@ -1886,7 +1895,9 @@ class ContinuousScanManipulationFrame(tk.Frame):
             ######################################################################
             ### Initialize Animation (Visualization) for each electrode figure ###
             ######################################################################
-            fig_count = 0                   # index value for the frame
+            fig_count = 0    
+            print("The type for figures is")
+            print(figures)               # index value for the frame
             for figure in figures:
                 fig, self.ax = figure
                 electrode = electrode_list[fig_count]
@@ -1963,14 +1974,14 @@ class FrequencyMapManipulationFrame(tk.Frame):
         RegressionFrame.columnconfigure(1, weight=1)
 
         #--- Title ---#
-        self.RegressionLabel = tk.Label(RegressionFrame, text = 'Real Time Analysis Manipulation', font=LARGE_FONT)
+        self.RegressionLabel = ttk.Label(RegressionFrame, text = 'Real Time Analysis Manipulation', font=('Verdana', 11))
         self.RegressionLabel.grid(row=0,column=0,columnspan=4,pady=5,padx=5)
 
 
         ###################################################################
         ### Real Time Manipulation of Savitzky-Golay Smoothing Function ###
         ###################################################################
-        self.SmoothingLabel = tk.Label(RegressionFrame, text = 'Savitzky-Golay Window (mV)', font = LARGE_FONT)
+        self.SmoothingLabel = ttk.Label(RegressionFrame, text = 'Savitzky-Golay Window (mV)', font = LARGE_FONT)
         self.SmoothingLabel.grid(row=1,column=0,columnspan=4,pady=1)
         self.SmoothingEntry = tk.Entry(RegressionFrame, width=10)
         self.SmoothingEntry.grid(row=2,column=0,columnspan=4,pady=3)
@@ -2000,14 +2011,14 @@ class FrequencyMapManipulationFrame(tk.Frame):
             ShowFrames['LowParameterFrame'] = LowParameterFrame
 
             #--- points discarded at the beginning of the voltammogram, xstart ---#
-            self.low_xstart_label = tk.Label(LowParameterFrame, text = 'xstart (V)', font=MEDIUM_FONT).grid(row=0,column=0)
+            self.low_xstart_label = ttk.Label(LowParameterFrame, text = 'xstart (V)', font=('Verdana', 10)).grid(row=0,column=0)
             self.low_xstart_entry = tk.Entry(LowParameterFrame, width=7)
             self.low_xstart_entry.insert(END, str(low_xstart))
             self.low_xstart_entry.grid(row=1,column=0)
             low_xstart_entry = self.low_xstart_entry
 
             #--- points discarded at the beginning of the voltammogram, xend ---#
-            self.low_xend_label = tk.Label(LowParameterFrame, text = 'xend (V)', font=MEDIUM_FONT).grid(row=0,column=1)
+            self.low_xend_label = ttk.Label(LowParameterFrame, text = 'xend (V)', font=('Verdana', 10)).grid(row=0,column=1)
             self.low_xend_entry = tk.Entry(LowParameterFrame, width=7)
             self.low_xend_entry.insert(END, str(low_xend))
             self.low_xend_entry.grid(row=1,column=1)
@@ -2028,14 +2039,14 @@ class FrequencyMapManipulationFrame(tk.Frame):
             ShowFrames['HighParameterFrame'] = HighParameterFrame
 
             #--- points discarded at the beginning of the voltammogram, xstart ---#
-            self.high_xstart_label = tk.Label(HighParameterFrame, text = 'xstart (V)', font=MEDIUM_FONT).grid(row=0,column=0)
+            self.high_xstart_label = ttk.Label(HighParameterFrame, text = 'xstart (V)', font=('Verdana', 10)).grid(row=0,column=0)
             self.high_xstart_entry = tk.Entry(HighParameterFrame, width=7)
             self.high_xstart_entry.insert(END, str(high_xstart))
             self.high_xstart_entry.grid(row=1,column=0)
             high_xstart_entry = self.high_xstart_entry
 
             #--- points discarded at the beginning of the voltammogram, xend ---#
-            self.high_xend_label = tk.Label(HighParameterFrame, text = 'xend (V)', font=MEDIUM_FONT).grid(row=0,column=1)
+            self.high_xend_label = ttk.Label(HighParameterFrame, text = 'xend (V)', font=('Verdana', 10)).grid(row=0,column=1)
             self.high_xend_entry = tk.Entry(HighParameterFrame, width=7)
             self.high_xend_entry.insert(END, str(high_xend))
             self.high_xend_entry.grid(row=1,column=1)
@@ -2055,7 +2066,7 @@ class FrequencyMapManipulationFrame(tk.Frame):
 
 
         #--- Button to apply adjustments ---#
-        self.AdjustParameterButton = ttk.Button(RegressionFrame, text = 'Apply Adjustments', font=LARGE_FONT, command = lambda: self.AdjustParameters())
+        self.AdjustParameterButton = ttk.Button(RegressionFrame, text = 'Apply Adjustments', command = lambda: self.AdjustParameters())
         self.AdjustParameterButton.grid(row=5,column=0,columnspan=4,pady=10,padx=10)
 
 
@@ -2249,10 +2260,10 @@ class ContinuousScanVisualizationFrame(tk.Frame):
         self.columnconfigure(1, weight = 1)
         self.rowconfigure(2, weight=2)
 
-        ElectrodeLabel = tk.Label(self, text='%s' % electrode ,font=HUGE_FONT)
+        ElectrodeLabel = ttk.Label(self, text='%s' % electrode ,font=('Verdana', 18))
         ElectrodeLabel.grid(row=0,column=0,pady=5,sticky='n')
 
-        FrameFileLabel = tk.Label(self, text = '', font=MEDIUM_FONT)
+        FrameFileLabel = ttk.Label(self, text = '', font=('Verdana', 10))
         FrameFileLabel.grid(row=0,column=1,pady=3,sticky='ne')
 
         #--- Voltammogram, Raw Peak Height, and Normalized Figure and Artists ---#
@@ -2282,10 +2293,10 @@ class FrequencyMapVisualizationFrame(tk.Frame):
         self.columnconfigure(1, weight = 1)
         self.rowconfigure(2, weight=2)
 
-        ElectrodeLabel = tk.Label(self, text='%s' % electrode ,font=HUGE_FONT)
+        ElectrodeLabel = ttk.Label(self, text='%s' % electrode ,font=('Verdana', 18))
         ElectrodeLabel.grid(row=0,column=0,pady=5,sticky='n')
 
-        FrameFileLabel = tk.Label(self, text = '', font=MEDIUM_FONT)
+        FrameFileLabel = ttk.Label(self, text = '', font=('Verdana', 10))
         FrameFileLabel.grid(row=0,column=1,pady=3,sticky='ne')
 
         #--- Voltammogram, Raw Peak Height, and Normalized Figure and Artists ---#
@@ -2383,14 +2394,18 @@ class InitializeContinuousCanvas():
         ######################################################
         ### Create a figure and artists for each electrode ###
         ######################################################
+
+        print("The electrode_count is" + str(electrode_count))
         for num in range(electrode_count):
             electrode = electrode_list[num]
-            figure = self.MakeFigure(electrode)
+            figure = self.MakeFigure(electrode,frame_list)
             figures.append(figure)
 
             if len(frequency_list) > 1:
                 ratio_figure = self.MakeRatiometricFigure(electrode)
                 ratiometric_figures.append(ratio_figure)
+        
+        print("Framelist right after for loop is\n :" + str(len(frame_list)))
 
 
         #####################################################
@@ -2417,10 +2432,14 @@ class InitializeContinuousCanvas():
             PlotFrames[electrode_frame] = FrameReference
 
             frame_count += 1
+        
+        print("The framecount is" + str(frame_count))
 
         #--- Create a list containing the Frame objects for each electrode ---#
         for reference, frame in PlotFrames.items():
             PlotValues.append(frame)
+        
+        print("Immediately after the for loop, the length is :" + str(len(PlotValues)))
 
 
         #################################
@@ -2440,8 +2459,8 @@ class InitializeContinuousCanvas():
     ############################################
     ### Create the figure and artist objects ###
     ############################################
-    def MakeFigure(self, electrode):
-        global list_val, EmptyPlots, plot_list, SampleRate, frame_list, numFiles
+    def MakeFigure(self, electrode,frame_list):
+        global list_val, EmptyPlots, plot_list, SampleRate, numFiles
 
         print('Make Figure: Continuous Scan')
         try:
@@ -2518,12 +2537,12 @@ class InitializeContinuousCanvas():
 
                 #---Initiate the subplots---#
                 # this assigns a Line2D artist object to the artist object (Axes)
-                smooth, = ax[0,subplot_count].plot([],[],'ko',Markersize=2)
+                smooth, = ax[0, subplot_count].plot([], [], 'ko', markersize=2)
                 regress, = ax[0,subplot_count].plot([],[],'r-')
                 linear, = ax[0,subplot_count].plot([],[],'r-')
 
-                peak, = ax[1,subplot_count].plot([],[],'ko',MarkerSize=1)
-                peak_injection, = ax[1,subplot_count].plot([],[],'bo',MarkerSize=1)
+                peak, = ax[1,subplot_count].plot([],[],'ko',markersize=1)
+                peak_injection, = ax[1,subplot_count].plot([],[],'bo',markersize=1)
                 normalization, = ax[2,subplot_count].plot([],[],'ko',markersize=1)
                 norm_injection, = ax[2,subplot_count].plot([],[],'ro',markersize=1)
 
@@ -2885,6 +2904,8 @@ class InitializeFrequencyMapCanvas():
             FrameReference = FrequencyMapVisualizationFrame(electrode_frame, frame_count, PlotContainer, self)            # PlotContainer is the 'parent' frame
             FrameReference.grid(row=0,column=0,sticky='nsew')      # sticky must be 'nsew' so it expands and contracts with resize
             PlotFrames[electrode_frame] = FrameReference
+            print("This is what's stored in\n")
+            print(FrameReference)
 
             frame_count += 1
 
@@ -2978,6 +2999,7 @@ class InitializeFrequencyMapCanvas():
             electrode_frame = 'Electrode %s' % str(electrode)
             if electrode_frame not in frame_list:
                 frame_list.append(electrode_frame)
+                print("Entered 2996 for loop")
 
             #--- Create empty plots to return to animate for initializing---#
             EmptyPlots = [smooth,regress,charge]
@@ -4225,7 +4247,7 @@ class DataNormalization():
             ###############################
             ### GUI Normalization Label ###
             ###############################
-            NormWarning['fg'] = 'green'
+            NormWarning['foreground'] = 'green'
             NormWarning['text'] = 'Normalized to file %s' % str(NormalizationPoint)
 
 
@@ -4279,7 +4301,7 @@ class DataNormalization():
 
 
             #--- Indicate that the data has been normalized to the new NormalizationPoint ---#
-            NormWarning['fg'] = 'green'
+            NormWarning['foreground'] = 'green'
             NormWarning['text'] = 'Normalized to file %s' % str(NormalizationPoint)
             wait_time.NormalizationProceed()
 
@@ -4391,7 +4413,7 @@ class PostAnalysis(tk.Frame):
         ###################################################
         tk.Frame.__init__(self, self.parent)             # initialize the frame
 
-        self.Title = tk.Label(self, text = 'Post Analysis', font=HUGE_FONT).grid(row=0,column=0,columnspan=2)
+        self.Title = ttk.Label(self, text = 'Post Analysis', font=('Verdana', 18)).grid(row=0,column=0,columnspan=2)
 
         DataAdjustmentFrame = tk.Frame(self, relief='groove',bd=3)
         DataAdjustmentFrame.grid(row=1,column=0,columnspan=2,pady=5, ipadx=50, padx=2, sticky = 'ns')
@@ -4400,7 +4422,7 @@ class PostAnalysis(tk.Frame):
         NormalizationFrame.grid(row=1,column=0,pady=5)
 
         #--- Real-time Normalization Variable ---#
-        SetPointNormLabel = tk.Label(NormalizationFrame, text = 'Set Normalization Point', font=MEDIUM_FONT).grid(row=0,column=0,pady=5)
+        SetPointNormLabel = ttk.Label(NormalizationFrame, text = 'Set Normalization Point', font=('Verdana', 10)).grid(row=0,column=0,pady=5)
         NormalizationVar = tk.StringVar()
         NormString = str(NormalizationPoint)
         NormalizationVar.set(NormString)
@@ -4411,7 +4433,7 @@ class PostAnalysis(tk.Frame):
         #--- Button to apply any changes to the normalization variable ---#
         NormalizeButton = ttk.Button(NormalizationFrame, text='Apply Norm', command = lambda: self.PostAnalysisNormalization(), width=10)
         NormalizeButton.grid(row=2,column=0)
-        self.NormWarning = tk.Label(NormalizationFrame,text='',fg='red',font=MEDIUM_FONT)
+        self.NormWarning = ttk.Label(NormalizationFrame,text='',foreground='red',font=('Verdana', 10))
         NormWarning = self.NormWarning
 
         if len(frequency_list) > 1:
@@ -4420,11 +4442,11 @@ class PostAnalysis(tk.Frame):
             self.FrequencyFrame.grid(row=2,column=0,pady=10,padx=3,ipady=2)
 
             #--- Drift Correction Title ---#
-            self.KDM_title = tk.Label(self.FrequencyFrame, text = 'Drift Correction', font=LARGE_FONT)
+            self.KDM_title = ttk.Label(self.FrequencyFrame, text = 'Drift Correction', font=('Verdana', 11))
             self.KDM_title.grid(row=0,column=0,columnspan=3,pady=1,padx=5)
 
             #--- High Frequency Selection for KDM and Ratiometric Analysis ---#
-            self.HighFrequencyLabel = tk.Label(self.FrequencyFrame, text='High Frequency',font=MEDIUM_FONT)
+            self.HighFrequencyLabel = ttk.Label(self.FrequencyFrame, text='High Frequency',font=('Verdana', 10))
             self.HighFrequencyLabel.grid(row=1,column=1,pady=5,padx=5)
 
             self.HighFrequencyEntry = tk.Entry(self.FrequencyFrame, width=7)
@@ -4432,19 +4454,19 @@ class PostAnalysis(tk.Frame):
             self.HighFrequencyEntry.grid(row=2,column=1,padx=5)
 
             #--- Low Frequency Selection for KDM and Ratiometric Analysis ---#
-            self.LowFrequencyLabel = tk.Label(self.FrequencyFrame, text='Low Frequency',font=MEDIUM_FONT)
+            self.LowFrequencyLabel = ttk.Label(self.FrequencyFrame, text='Low Frequency',font=('Verdana', 10))
             self.LowFrequencyLabel.grid(row=1,column=0,pady=5,padx=5)
 
             self.LowFrequencyEntry = tk.Entry(self.FrequencyFrame, width=7)
             self.LowFrequencyEntry.insert(END, LowFrequency)
             self.LowFrequencyEntry.grid(row=2,column=0,padx=5)
 
-            self.LowFrequencyOffsetLabel = tk.Label(self.FrequencyFrame, text = 'Low Frequency\n Offset', font=MEDIUM_FONT).grid(row=3,column=0,pady=2,padx=2)
+            self.LowFrequencyOffsetLabel = ttk.Label(self.FrequencyFrame, text = 'Low Frequency\n Offset', font=('Verdana', 10)).grid(row=3,column=0,pady=2,padx=2)
             self.LowFrequencyOffset = tk.Entry(self.FrequencyFrame, width=7)
             self.LowFrequencyOffset.insert(END,LowFrequencyOffset)
             self.LowFrequencyOffset.grid(row=4,column=0,padx=2,pady=2)
 
-            self.LowFrequencySlopeLabel = tk.Label(self.FrequencyFrame, text = 'Low Frequency\n Slope Manipulation', font=MEDIUM_FONT).grid(row=3,column=1,pady=2,padx=2)
+            self.LowFrequencySlopeLabel = ttk.Label(self.FrequencyFrame, text = 'Low Frequency\n Slope Manipulation', font=('Verdana', 10)).grid(row=3,column=1,pady=2,padx=2)
             self.LowFrequencySlope = tk.Entry(self.FrequencyFrame, width=7)
             self.LowFrequencySlope.insert(END,LowFrequencySlope)
             self.LowFrequencySlope.grid(row=4,column=1,padx=2,pady=2)
@@ -4559,7 +4581,7 @@ class PostAnalysis(tk.Frame):
 
         data_normalization.ResetRatiometricData()
 
-        self.NormWarning['fg'] = 'green'
+        self.NormWarning['foreground'] = 'green'
         self.NormWarning['text'] = 'Normalized to File %d' % NormalizationPoint
 
         if SaveVar:
@@ -4682,7 +4704,7 @@ class PostAnalysis(tk.Frame):
         if CheckVar == 3:
             if ExistVar:
                 WrongFrequencyLabel.grid_forget()
-            WrongFrequencyLabel = tk.Label(self.FrequencyFrame, text='High Frequency Does Not Exist', fg='red')
+            WrongFrequencyLabel = ttk.Label(self.FrequencyFrame, text='High Frequency Does Not Exist', foreground='red')
             WrongFrequencyLabel.grid(row=6,column=0,columnspan=4)
             if not ExistVar:
                 ExistVar = True
@@ -4691,7 +4713,7 @@ class PostAnalysis(tk.Frame):
         elif CheckVar == 1:
             if ExistVar:
                 WrongFrequencyLabel.grid_forget()
-            WrongFrequencyLabel = tk.Label(self.FrequencyFrame, text='Low Frequency Does Not Exist', fg='red')
+            WrongFrequencyLabel = ttk.Label(self.FrequencyFrame, text='Low Frequency Does Not Exist', foreground='red')
             WrongFrequencyLabel.grid(row=6,column=0,columnspan=4)
             if not ExistVar:
                 ExistVar = True
@@ -4700,7 +4722,7 @@ class PostAnalysis(tk.Frame):
         elif CheckVar == 4:
             if ExistVar:
                 WrongFrequencyLabel.grid_forget()
-            WrongFrequencyLabel = tk.Label(self.FrequencyFrame, text='High and Low Frequencies Do Not Exist', fg='red')
+            WrongFrequencyLabel = ttk.Label(self.FrequencyFrame, text='High and Low Frequencies Do Not Exist', foreground='red')
             WrongFrequencyLabel.grid(row=6,column=0,columnspan=4)
             if not ExistVar:
                 ExistVar = True
@@ -4735,7 +4757,7 @@ class PostAnalysis(tk.Frame):
             wait_time.NormalizationWaitTime()
 
         elif NormalizationPoint > file:
-            NormWarning['fg'] = 'red'
+            NormWarning['foreground'] = 'red'
             NormWarning['text'] = 'File %s has \nnot been analyzed' % str(NormalizationPoint)
 
         if analysis_complete:
@@ -4761,19 +4783,19 @@ class PostAnalysis(tk.Frame):
         self.SelectFilePath = ttk.Button(self.win, style = 'On.TButton', text = '%s' % DataFolder, command = lambda: self.FindFile(self.parent))
         self.SelectFilePath.grid(row=0,column=0,columnspan=2)
 
-        self.NoSelectedPath = tk.Label(self.win, text = 'No File Path Selected', fg = 'red')
+        self.NoSelectedPath = ttk.Label(self.win, text = 'No File Path Selected', foreground = 'red')
         self.PathWarningExists = False               # tracks the existence of a warning label
 
         #--- File Handle Input ---#
-        HandleLabel = tk.Label(self.win, text='Exported File Handle:', font=LARGE_FONT)
+        HandleLabel = ttk.Label(self.win, text='Exported File Handle:', font=('Verdana', 11))
         HandleLabel.grid(row=4,column=0,columnspan=2)
         self.filehandle = tk.Entry(self.win)
         self.filehandle.insert(END, FileHandle)
         self.filehandle.grid(row=5,column=0,columnspan=2,pady=5)
 
-        self.ElectrodeLabel = tk.Label(self.win, text='Select Electrodes:', font=LARGE_FONT)
+        self.ElectrodeLabel = ttk.Label(self.win, text='Select Electrodes:', font=('Verdana', 11))
         self.ElectrodeLabel.grid(row=10,column=0, sticky = 'nswe')
-        self.ElectrodeCount = Listbox(self.win, relief='groove', exportselection=0, width=10, font=LARGE_FONT, height=6, selectmode = 'multiple', bd=3)
+        self.ElectrodeCount = Listbox(self.win, relief='groove', exportselection=0, width=10, font=('Verdana', 11), height=6, selectmode = 'multiple', bd=3)
         self.ElectrodeCount.bind('<<ListboxSelect>>',self.ElectrodeCurSelect)
         self.ElectrodeCount.grid(row=11,column=0,padx=10,sticky='nswe')
         for electrode in electrode_list:
@@ -4781,9 +4803,9 @@ class PostAnalysis(tk.Frame):
 
         #--- ListBox containing the frequencies given on line 46 (InputFrequencies) ---#
 
-        self.FrequencyLabel = tk.Label(self.win, text='Select Frequencies', font= LARGE_FONT)
+        self.FrequencyLabel = ttk.Label(self.win, text='Select Frequencies', font= LARGE_FONT)
         self.FrequencyLabel.grid(row=10,column=1,padx=10)
-        self.FrequencyList = Listbox(self.win, relief='groove', exportselection=0, width=5, font=LARGE_FONT, height = 5, selectmode='multiple', bd=3)
+        self.FrequencyList = Listbox(self.win, relief='groove', exportselection=0, width=5, font=('Verdana', 11), height = 5, selectmode='multiple', bd=3)
         self.FrequencyList.bind('<<ListboxSelect>>',self.FrequencyCurSelect)
         self.FrequencyList.grid(row=11,column=1,padx=10,sticky='nswe')
         for frequency in frequency_list:
@@ -4810,11 +4832,11 @@ class PostAnalysis(tk.Frame):
 
     #     if electrode_count is 0:
     #         self.ElectrodeListExists = False
-    #         self.ElectrodeLabel['fg'] = 'red'
+    #         self.ElectrodeLabel['foreground'] = 'red'
 
     #     elif electrode_count is not 0:
     #         self.ElectrodeListExists = True
-    #         self.ElectrodeLabel['fg'] = 'black'
+    #         self.ElectrodeLabel['foreground'] = 'black'
 
     #--- Frequency Selection ---#
     # def FrequencyCurSelect(self):
@@ -4825,14 +4847,14 @@ class PostAnalysis(tk.Frame):
     #     if len(frequency_list) is not 0:
 
     #         self.FrequencyListExists = True
-    #         self.FrequencyLabel['fg'] = 'black'
+    #         self.FrequencyLabel['foreground'] = 'black'
 
     #         for var in frequency_list:
     #             var = int(var)
 
     #     elif len(frequency_list) is 0:
     #         self.FrequencyListExists = False
-    #         self.FrequencyLabel['fg'] = 'red'
+    #         self.FrequencyLabel['foreground'] = 'red'
 
 
     def FindFile(self, parent):
@@ -5515,13 +5537,21 @@ def _update_global_lists(file):
                     ############################################
 
 if __name__ == '__main__':
+    
     method=""
     root = tk.Tk()
     app = MainWindow(root)
-
     style = ttk.Style()
-    style.configure('On.TButton', foreground = 'blue', font = LARGE_FONT, relief = 'raised', border = 100)
+    style.configure('On.TButton', foreground = 'blue', font = ('Verdana', 11), relief = 'raised', border = 100)
     style.configure('Off.TButton', foreground = 'black', relief = 'sunken', border = 5)
+    style.configure('LARGE_FONT', font=('Verdana', 11))
+    style.configure('HUGE_FONT',font=('Verdana', 18))
+    style.configure('MEDIUM_FONT',font=('Verdana', 10))
+    style.configure('SMALL_FONT',font=('Verdana', 8))
+    
+   
+
+ 
 
     while True:
         #--- initiate the mainloop ---#
@@ -5536,3 +5566,11 @@ if __name__ == '__main__':
                     #*########################################*#
                     #*############ End of Program ############*#
                     #*########################################*#
+
+
+
+
+
+
+
+

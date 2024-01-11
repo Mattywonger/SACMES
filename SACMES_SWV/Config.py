@@ -62,6 +62,6 @@ def low_freq_parameter():
 def font_specification():
     HUGE_FONT = ('Verdana', 18)
     LARGE_FONT = ('Verdana', 11)
-    MEDIUM_FONT = ('Verdnana', 10)
+    MEDIUM_FONT = ('Verdana', 10)
     SMALL_FONT = ('Verdana', 8)
     return HUGE_FONT,LARGE_FONT,MEDIUM_FONT,SMALL_FONT
