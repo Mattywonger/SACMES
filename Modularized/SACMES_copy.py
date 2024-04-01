@@ -1,4 +1,4 @@
-import Config,helper
+import config_m,helper_m
 import os
 import matplotlib
 import sys
@@ -36,8 +36,9 @@ from operator import truediv
 import threading
 from threading import Thread
 from queue import Queue
+import Remodularized
 
-import helper
+import helper_m
 style.use('ggplot')
 
 #---Filter out error warnings---#
@@ -46,25 +47,25 @@ warnings.simplefilter('ignore', np.RankWarning)         #numpy polyfit_deg warni
 warnings.filterwarnings(action="ignore", module="scipy", message="^internal gelsd") #RuntimeWarning
 
 
-handle_variable,e_var,PHE_method,InputFrequencies,electrodes = Config.globalvar_config()
+handle_variable,e_var,PHE_method,InputFrequencies,electrodes = config_m.globalvar_config()
 high_xstart = None
 high_xend = None
 low_xstart = None
 low_xend = None
-sg_window,sg_degree,polyfit_deg,cutoff_frequency = Config.regressionvar_config()
-key,search_lim,PoisonPill,FoundFilePath,ExistVar,AlreadyInitiated,HighAlreadyReset,LowAlreadyReset,analysis_complete= Config.checkpoint_parameter()
-delimiter,extension,current_column,current_column_index,voltage_column,voltage_column_index,spacing_index,byte_limit,byte_index = Config.data_extraction_parameter()
-LowFrequencyOffset,LowFrequencySlope = Config.low_freq_parameter()
-HUGE_FONT,LARGE_FONT,MEDIUM_FONT,SMALL_FONT = Config.font_specification()
+sg_window,sg_degree,polyfit_deg,cutoff_frequency = config_m.regressionvar_config()
+key,search_lim,PoisonPill,FoundFilePath,ExistVar,AlreadyInitiated,HighAlreadyReset,LowAlreadyReset,analysis_complete= config_m.checkpoint_parameter()
+delimiter,extension,current_column,current_column_index,voltage_column,voltage_column_index,spacing_index,byte_limit,byte_index = config_m.data_extraction_parameter()
+LowFrequencyOffset,LowFrequencySlope = config_m.low_freq_parameter()
+HUGE_FONT,LARGE_FONT,MEDIUM_FONT,SMALL_FONT = config_m.font_specification()
 method=""
 
 
 def _retrieve_file(file, electrode, frequency):
     #try:
     if method == 'Continuous Scan':
-        files = helper.process_continuous_scan(e_var,handle_variable,frequency,file,extension,electrode)
+        files = helper_m.process_continuous_scan(e_var,handle_variable,frequency,file,extension,electrode)
     elif method == 'Frequency Map':
-        files = helper.process_Frequencymap(e_var,handle_variable, frequency, file, extension,electrode)
+        files = helper_m.process_Frequencymap(e_var,handle_variable, frequency, file, extension,electrode)
     return files
     #except:
      #  print('\nError in retrieve_file\n')
@@ -2729,7 +2730,7 @@ class InitializeContinuousCanvas():
             root.after(1000, self.InitializeSubplots, ax, frequency, electrode, subplot_count)
 
 
-    def RunInitialization(self, myfile, ax, subplot_count, electrode, frequency):
+    def RunInitialization(self, myfile, ax, subplot_count, electrode, frequency,min1,min2,max1,max2):
         global high_xstart, high_xend, low_xstart, low_xend
 
         try:
@@ -2738,103 +2739,9 @@ class InitializeContinuousCanvas():
             #########################
 
             potentials, currents, data_dict = ReadData(myfile, electrode)
-
-            ##########################################
-            ### Set the x axes of the voltammogram ###
-            ##########################################
-            MIN_POTENTIAL = min(potentials)
-            MAX_POTENTIAL = max(potentials)
-            #-- Reverse voltammogram to match the 'Texas' convention --#
-            ax[0,subplot_count].set_xlim(MAX_POTENTIAL,MIN_POTENTIAL)
-
-
-            #######################################
-            ### Get the high and low potentials ###
-            #######################################
-
-            if int(frequency) > cutoff_frequency:
-
-                if not HighAlreadyReset:
-                    high_xstart = max(potentials)
-                    high_xend = min(potentials)
-
-                #-- set the local variables to the global ---#
-                xend = high_xend
-                xstart = high_xstart
-
-            elif int(frequency) <= cutoff_frequency:
-
-                if not LowAlreadyReset:
-                    low_xstart = max(potentials)
-                    low_xend = min(potentials)
-
-                #-- set the local variables to the global ---#
-                xstart = low_xstart
-                xend = low_xend
-
-
-            cut_value = 0
-            for value in potentials:
-                if value == 0:
-                    cut_value += 1
-
-            if cut_value > 0:
-                potentials = potentials[:-cut_value]
-                currents = currents[:-cut_value]
-
-            adjusted_potentials = [value for value in potentials if xend <= value <= xstart]
-
-            #########################################
-            ### Savitzky-Golay smoothing          ###0----89
-            #########################################
-            smooth_currents = savgol_filter(currents, 15, sg_degree)
-            data_dict = dict(zip(potentials,smooth_currents))
-
-
-            #######################################
-            ### adjust the smooth currents to   ###
-            ### match the adjusted potentials   ###
-            #######################################
-            adjusted_currents = []
-            for potential in adjusted_potentials:
-                adjusted_currents.append(data_dict[potential])
-
-            ######################
-            ### Polynomial fit ###
-            ######################
-            polynomial_coeffs = np.polyfit(adjusted_potentials,adjusted_currents,polyfit_deg)
-            eval_regress = np.polyval(polynomial_coeffs,adjusted_potentials).tolist()
-            regression_dict = dict(zip(eval_regress, adjusted_potentials))      # dictionary with current: potential
-
-            fit_half = round(len(eval_regress)/2)
-            min1 = min(eval_regress[:-fit_half])
-            min2 = min(eval_regress[fit_half:])
-            max1 = max(eval_regress[:-fit_half])
-            max2 = max(eval_regress[fit_half:])
-
-            linear_fit = np.polyfit([regression_dict[min1],regression_dict[min2]],[min1,min2],1)
-            linear_regression = polyval(linear_fit,[regression_dict[min1],regression_dict[min2]]).tolist()
-
-            if SelectedOptions == 'Peak Height Extraction':
-                Peak_Height = max(max1,max2)-min(min1,min2)
-                data = Peak_Height
-
-            if SelectedOptions == 'Area Under the Curve':
-                AUC_index = 1
-                AUC = 0
-
-                AUC_potentials = adjusted_potentials
-                AUC_min = min(adjusted_currents)
-                AUC_currents = [Y - AUC_min for Y in adjusted_currents]
-
-                while AUC_index <= len(AUC_currents) - 1:
-                    AUC_height = (AUC_currents[AUC_index] + AUC_currents[AUC_index - 1])/2
-                    AUC_width = AUC_potentials[AUC_index] - AUC_potentials[AUC_index - 1]
-                    AUC += (AUC_height * AUC_width)
-                    AUC_index += 1
-
-                data = AUC
-
+            data = Remodularized.data_analysis(data_method,SelectedOptions,frequency,currents,potentials,max1,max2,min1,min2)
+            
+            
             #--- calculate the baseline current ---#
             minimum_current = min(min1,min2)
             maximum_current = max(max1,max2)
