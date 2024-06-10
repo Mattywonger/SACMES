@@ -89,7 +89,6 @@ def ReadData(myfile, electrode):
             #---Preallocate Potential and Current lists---#
             with open(myfile,'r',encoding='utf-16') as mydata:
                
-
                 variables = len(mydata.readlines())
                 potentials = ['hold']*variables
                 ### key: potential; value: current ##
